@@ -2,12 +2,25 @@ use std::env;
 use std::time::Duration;
 
 use async_std::task;
-use fantoccini::Locator;
+use async_trait::async_trait;
+use fantoccini::{error::CmdError, Client, Element, Locator};
 use maplit::hashmap;
 
 use super::webdriver;
 
-pub async fn scrap_kbcard() -> Result<(), fantoccini::error::CmdError> {
+#[async_trait]
+trait WebDriverClientExtension {
+    async fn find_by_aria_label(&mut self, label: &str) -> Result<Element, CmdError>;
+}
+
+#[async_trait]
+impl WebDriverClientExtension for Client {
+    async fn find_by_aria_label(&mut self, label: &str) -> Result<Element, CmdError> {
+        self.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", label))).await
+    }
+}
+
+pub async fn scrap_kbcard() -> Result<(), CmdError> {
     let mut c = webdriver::create_webdriver_client().await;
 
     // TODO mobile kbcard doesn't have transaction list. we have to call pc version on vm with astx
@@ -47,27 +60,21 @@ pub async fn scrap_kbcard() -> Result<(), fantoccini::error::CmdError> {
     };
     for password_char in kbcard_password.chars() {
         if password_char.is_uppercase() {
-            c.find(Locator::XPath("//*[@aria-label=\"쉬프트\"]")).await?.click().await?;
-            c.find(Locator::XPath(&format!("//*[@aria-label=\"대문자{}\"]", password_char)))
-                .await?
-                .click()
-                .await?;
-            c.find(Locator::XPath("//*[@aria-label=\"쉬프트\"]")).await?.click().await?;
+            c.find_by_aria_label("쉬프트").await?.click().await?;
+            c.find_by_aria_label(&format!("대문자{}", password_char)).await?.click().await?;
+            c.find_by_aria_label("쉬프트").await?.click().await?;
         } else if !password_char.is_alphanumeric() {
             let label = specialchars_map.get(&password_char).unwrap();
-            c.find(Locator::XPath("//*[@aria-label=\"특수키\"]")).await?.click().await?;
-            c.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", label))).await?.click().await?;
-            c.find(Locator::XPath("//*[@aria-label=\"특수키\"]")).await?.click().await?;
+            c.find_by_aria_label("특수키").await?.click().await?;
+            c.find_by_aria_label(label).await?.click().await?;
+            c.find_by_aria_label("특수키").await?.click().await?;
         } else {
-            c.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", password_char)))
-                .await?
-                .click()
-                .await?;
+            c.find_by_aria_label(&password_char.to_string()).await?.click().await?;
         }
     }
     // webpage hides keyboard on max password len(12) reached
     if kbcard_password.len() < 12 {
-        c.find(Locator::XPath("//*[@aria-label=\"입력완료\"]")).await?.click().await?;
+        c.find_by_aria_label("입력완료").await?.click().await?;
     }
 
     c.find(Locator::Id("btnIdPwdLogin")).await?.click().await?;
