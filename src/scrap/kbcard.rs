@@ -1,4 +1,3 @@
-use std::env;
 use std::time::Duration;
 
 use async_std::task;
@@ -20,10 +19,14 @@ impl WebDriverClientExtension for Client {
     }
 }
 
-pub async fn scrap_kbcard() -> Result<(), CmdError> {
-    let mut c = webdriver::create_webdriver_client().await;
-
+pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
     // TODO mobile kbcard doesn't have transaction list. we have to call pc version on vm with astx
+
+    if password.len() > 12 {
+        panic!("kbcard password length must be lower or equal than 12 chars");
+    }
+
+    let mut c = webdriver::create_webdriver_client().await;
 
     c.goto("https://m.kbcard.com").await?;
 
@@ -35,14 +38,8 @@ pub async fn scrap_kbcard() -> Result<(), CmdError> {
     c.find(Locator::LinkText("아이디")).await?.click().await?;
 
     // Input credentials
-    let kbcard_id = env::var("KBCARD_ID").unwrap();
-    let kbcard_password = env::var("KBCARD_PW").unwrap();
 
-    if kbcard_password.len() > 12 {
-        panic!("kbcard password length must be lower or equal than 12 chars");
-    }
-
-    c.find(Locator::Id("userId")).await?.send_keys(&kbcard_id).await?;
+    c.find(Locator::Id("userId")).await?.send_keys(&id).await?;
     c.find(Locator::Id("userPwd")).await?.click().await?;
 
     let specialchars_map = hashmap! {
@@ -58,7 +55,7 @@ pub async fn scrap_kbcard() -> Result<(), CmdError> {
         '*' => "별표",
         // TODO
     };
-    for password_char in kbcard_password.chars() {
+    for password_char in password.chars() {
         if password_char.is_uppercase() {
             c.find_by_aria_label("쉬프트").await?.click().await?;
             c.find_by_aria_label(&format!("대문자{}", password_char)).await?.click().await?;
@@ -73,7 +70,7 @@ pub async fn scrap_kbcard() -> Result<(), CmdError> {
         }
     }
     // webpage hides keyboard on max password len(12) reached
-    if kbcard_password.len() < 12 {
+    if password.len() < 12 {
         c.find_by_aria_label("입력완료").await?.click().await?;
     }
 

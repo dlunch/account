@@ -1,6 +1,7 @@
 mod scrap;
 
 use std::boxed::Box;
+use std::env;
 use std::error::Error;
 
 use dotenv::dotenv;
@@ -9,7 +10,10 @@ use dotenv::dotenv;
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
-    scrap::scrap_kbcard().await?;
+    let kbcard_id = env::var("KBCARD_ID").unwrap();
+    let kbcard_password = env::var("KBCARD_PW").unwrap();
+
+    scrap::scrap_kbcard(&kbcard_id, &kbcard_password).await?;
 
     Ok(())
 }
