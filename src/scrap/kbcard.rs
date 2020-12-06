@@ -10,6 +10,8 @@ use super::webdriver;
 pub async fn scrap_kbcard() -> Result<(), fantoccini::error::CmdError> {
     let mut c = webdriver::create_webdriver_client().await;
 
+    // TODO mobile kbcard doesn't have transaction list. we have to call pc version on vm with astx
+
     c.goto("https://m.kbcard.com").await?;
 
     // To login page
