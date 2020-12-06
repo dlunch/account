@@ -6,10 +6,10 @@ use webdriver::capabilities::Capabilities;
 
 pub async fn create_webdriver_client() -> Client {
     let webdriver_host = env::var("WEBDRIVER_HOST").unwrap();
-    let webdriver_headless = env::var("WEBDRIVER_HEADLESS").is_ok();
+    let webdriver_headed = env::var("WEBDRIVER_HEADED").is_ok();
 
     let mut cap = Capabilities::new();
-    if webdriver_headless {
+    if !webdriver_headed {
         let arg = json!({"args": ["-headless"]});
         cap.insert("moz:firefoxOptions".to_string(), arg);
     }
