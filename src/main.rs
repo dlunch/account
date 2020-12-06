@@ -4,6 +4,7 @@ use std::time::Duration;
 use async_std::task;
 use dotenv::dotenv;
 use fantoccini::{Client, Locator};
+use maplit::hashmap;
 use serde_json::json;
 use webdriver::capabilities::Capabilities;
 
@@ -11,10 +12,7 @@ use webdriver::capabilities::Capabilities;
 async fn main() -> Result<(), fantoccini::error::CmdError> {
     dotenv().ok();
 
-    let kbcard_id = env::var("KBCARD_ID").unwrap();
-    let kbcard_password = env::var("KBCARD_PW").unwrap();
     let webdriver_host = env::var("WEBDRIVER_HOST").unwrap();
-
     let webdriver_headless = env::var("WEBDRIVER_HEADLESS").is_ok();
 
     let mut cap = Capabilities::new();
@@ -37,15 +35,53 @@ async fn main() -> Result<(), fantoccini::error::CmdError> {
     c.find(Locator::LinkText("아이디")).await?.click().await?;
 
     // Input credentials
+    let kbcard_id = env::var("KBCARD_ID").unwrap();
+    let kbcard_password = env::var("KBCARD_PW").unwrap();
+
+    if kbcard_password.len() > 12 {
+        panic!("kbcard password length must be lower or equal than 12 chars");
+    }
+
     c.find(Locator::Id("userId")).await?.send_keys(&kbcard_id).await?;
     c.find(Locator::Id("userPwd")).await?.click().await?;
+
+    let specialchars_map = hashmap! {
+        '`' => "어금기호",
+        '~' => "물결표시",
+        '!' => "느낌표",
+        '@' => "골뱅이",
+        '#' => "우물정",
+        '$' => "달러기호",
+        '%' => "퍼센트",
+        '^' => "꺽쇠",
+        '&' => "앰퍼샌드",
+        '*' => "별표",
+        // TODO
+    };
     for password_char in kbcard_password.chars() {
-        c.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", password_char)))
-            .await?
-            .click()
-            .await?;
+        if password_char.is_uppercase() {
+            c.find(Locator::XPath("//*[@aria-label=\"쉬프트\"]")).await?.click().await?;
+            c.find(Locator::XPath(&format!("//*[@aria-label=\"대문자{}\"]", password_char)))
+                .await?
+                .click()
+                .await?;
+            c.find(Locator::XPath("//*[@aria-label=\"쉬프트\"]")).await?.click().await?;
+        } else if !password_char.is_alphanumeric() {
+            let label = specialchars_map.get(&password_char).unwrap();
+            c.find(Locator::XPath("//*[@aria-label=\"특수키\"]")).await?.click().await?;
+            c.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", label))).await?.click().await?;
+            c.find(Locator::XPath("//*[@aria-label=\"특수키\"]")).await?.click().await?;
+        } else {
+            c.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", password_char)))
+                .await?
+                .click()
+                .await?;
+        }
     }
-    c.find(Locator::XPath("//*[@aria-label=\"입력완료\"]")).await?.click().await?;
+    // webpage hides keyboard on max password len(12) reached
+    if kbcard_password.len() < 12 {
+        c.find(Locator::XPath("//*[@aria-label=\"입력완료\"]")).await?.click().await?;
+    }
 
     c.find(Locator::Id("btnIdPwdLogin")).await?.click().await?;
 

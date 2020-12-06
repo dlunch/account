@@ -8,5 +8,6 @@ edition = "2018"
 fantoccini = { version = "^0.14", default-features = false }
 webdriver = { version = "^0.42", default-features = false }
 async-std = { version = "^1.7", features = ["tokio02", "tokio03", "attributes"] }
-serde_json = { version = "^1.0",  default-features = false }
-dotenv = { version = "^0.15" }
+serde_json = { version = "^1.0", default-features = false }
+dotenv = { version = "^0.15", default-features = false }
+maplit = { version = "^1.0", default-features = false }
