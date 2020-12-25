@@ -1,0 +1,14 @@
+FROM ubuntu:focal
+
+RUN apt update && apt install -y curl openssl iptables sudo socat
+RUN curl -O https://download.kbcard.com/security/wizvera/veraport-g3/veraport-g3_amd64.deb && \
+    curl -O https://download.kbcard.com/security/wizvera/delfino-g3/delfino-g3_amd64.deb && \
+    curl -O https://safetx.ahnlab.com/master/linux/astx_u64.deb
+RUN DEBIAN_FRONTEND="noninteractive" apt install -y ./veraport-g3_amd64.deb ./delfino-g3_amd64.deb ./astx_u64.deb
+
+WORKDIR /
+COPY . .
+
+# astx
+EXPOSE 55920:55930
+ENTRYPOINT ["/scripts/astx.sh"]
