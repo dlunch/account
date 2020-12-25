@@ -1,3 +1,3 @@
-# Cardpicker
+# Account
 
 WIP
