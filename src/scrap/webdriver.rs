@@ -11,8 +11,9 @@ pub async fn create_webdriver_client() -> Client {
     let mut cap = Capabilities::new();
     if !webdriver_headed {
         let arg = json!({"args": ["-headless"]});
-        cap.insert("moz:firefoxOptions".to_string(), arg);
+        cap.insert("moz:firefoxOptions".into(), arg);
     }
+    cap.insert("acceptInsecureCerts".into(), json!(true));
 
     Client::with_capabilities(&webdriver_host, cap)
         .await

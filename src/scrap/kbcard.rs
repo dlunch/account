@@ -2,81 +2,106 @@ use std::time::Duration;
 
 use async_std::task;
 use async_trait::async_trait;
-use fantoccini::{error::CmdError, Client, Element, Locator};
-use maplit::hashmap;
+use fantoccini::{error::CmdError, Client, Locator};
+use serde_json::{json, Value};
 
 use super::webdriver;
 
 #[async_trait]
 trait WebDriverClientExtension {
-    async fn find_by_aria_label(&mut self, label: &str) -> Result<Element, CmdError>;
+    async fn click_keypad_at(&mut self, x: isize, y: isize) -> Result<Value, CmdError>;
 }
 
 #[async_trait]
 impl WebDriverClientExtension for Client {
-    async fn find_by_aria_label(&mut self, label: &str) -> Result<Element, CmdError> {
-        self.find(Locator::XPath(&format!("//*[@aria-label=\"{}\"]", label))).await
+    async fn click_keypad_at(&mut self, x: isize, y: isize) -> Result<Value, CmdError> {
+        let res = self
+            .execute(
+                "
+                const nodes = document.querySelectorAll('li.sp');
+                for (const node of nodes) {
+                    const style = window.getComputedStyle(node);
+                    if (style.backgroundPositionX === arguments[0] + 'px' && style.backgroundPositionY === arguments[1] + 'px') {
+                        const rect = node.getBoundingClientRect();
+                        const event = new MouseEvent('click', {clientX: rect.x, clientY: rect.y, bubbles: true})
+                        node.dispatchEvent(event);
+                        return;
+                    }
+                }
+                throw 'no such element';
+            ",
+                vec![json!(x), json!(y)],
+            )
+            .await;
+
+        res
     }
 }
 
 pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
-    // TODO mobile kbcard doesn't have transaction list. we have to call pc version on vm with astx
-
     if password.len() > 12 {
         panic!("kbcard password length must be lower or equal than 12 chars");
     }
 
     let mut c = webdriver::create_webdriver_client().await;
 
-    c.goto("https://m.kbcard.com").await?;
+    c.goto("https://card.kbcard.com").await?;
 
     // To login page
-    c.find(Locator::Css(".hmBtn")).await?.click().await?;
-    c.find(Locator::Css(".btnLogin")).await?.click().await?;
+    c.find(Locator::Id("loginLinkBtn")).await?.click().await?;
 
     // Show login form
-    c.find(Locator::LinkText("아이디")).await?.click().await?;
+    c.find(Locator::Id("perTab01")).await?.click().await?;
 
     // Input credentials
 
-    c.find(Locator::Id("userId")).await?.send_keys(&id).await?;
-    c.find(Locator::Id("userPwd")).await?.click().await?;
+    c.find(Locator::Id("인터넷서비스로그인ID")).await?.send_keys(&id).await?;
+    c.find(Locator::Id("loginPwd")).await?.click().await?;
 
-    let specialchars_map = hashmap! {
-         '`' => "어금기호",
-        '~' => "물결표시",
-        '!' => "느낌표",
-        '@' => "골뱅이",
-        '#' => "우물정",
-        '$' => "달러기호",
-        '%' => "퍼센트",
-        '^' => "꺽쇠",
-        '&' => "앰퍼샌드",
-        '*' => "별표",
-        // TODO
-    };
-    for password_char in password.chars() {
-        if password_char.is_uppercase() {
-            c.find_by_aria_label("쉬프트").await?.click().await?;
-            c.find_by_aria_label(&format!("대문자{}", password_char)).await?.click().await?;
-            c.find_by_aria_label("쉬프트").await?.click().await?;
-        } else if !password_char.is_alphanumeric() {
-            let label = specialchars_map.get(&password_char).unwrap();
-            c.find_by_aria_label("특수키").await?.click().await?;
-            c.find_by_aria_label(label).await?.click().await?;
-            c.find_by_aria_label("특수키").await?.click().await?;
-        } else {
-            c.find_by_aria_label(&password_char.to_string()).await?.click().await?;
+    let keys = [
+        vec!['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        vec!['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        vec!['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z'],
+        vec!['x', 'c', 'v', 'b', 'n', 'm', 'Q', 'W', 'E', 'R'],
+        vec!['T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F'],
+        vec!['G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B'],
+        vec!['N', 'M', '`', '-', '=', '[', ']', '/', ';', '\''],
+        vec![',', '.', '/', '~', '!', '@', '#', '$', '%', '^'],
+        vec!['&', '*', '(', ')', '_', '+', '{', '}', '|', ':'],
+        vec!['"', '<', '>', '?', ' '],
+    ];
+    let shift_specialchars = [
+        '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '{', '}', '|', ':', '"', '<', '>', '?',
+    ];
+
+    let key_width = 42;
+    let key_height = 34;
+    let find_key_pos = |key| {
+        for (y, row) in keys.iter().enumerate() {
+            for (x, &item) in row.iter().enumerate() {
+                if item == key {
+                    return [-(x as isize) * key_width, -(y as isize) * key_height];
+                }
+            }
         }
-    }
-    // webpage hides keyboard on max password len(12) reached
-    if password.len() < 12 {
-        c.find_by_aria_label("입력완료").await?.click().await?;
-    }
+        panic!()
+    };
 
-    c.find(Locator::Id("btnIdPwdLogin")).await?.click().await?;
+    for password_char in password.chars() {
+        let [x, y] = find_key_pos(password_char);
+        if password_char.is_uppercase() || shift_specialchars.contains(&password_char) {
+            c.click_keypad_at(-180, -340).await?; // shift
+        }
+        c.click_keypad_at(x, y).await?;
+    }
+    c.click_keypad_at(-278, -374).await?; // finish
 
-    task::sleep(Duration::from_secs(10)).await;
+    c.find(Locator::Id("doIdLogin")).await?.click().await?;
+
+    c.wait_for_navigation(None).await?;
+
+    task::sleep(Duration::from_secs(1)).await; // ??? we need this
+    println!("{}", c.find(Locator::Css("#BeyondViewAreaDivId em")).await?.text().await?);
 
     c.close().await
 }
