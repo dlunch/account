@@ -15,9 +15,8 @@ trait WebDriverClientExtension {
 #[async_trait]
 impl WebDriverClientExtension for Client {
     async fn click_keypad_at(&mut self, x: isize, y: isize) -> Result<Value, CmdError> {
-        let res = self
-            .execute(
-                "
+        self.execute(
+            "
                 const nodes = document.querySelectorAll('li.sp');
                 for (const node of nodes) {
                     const style = window.getComputedStyle(node);
@@ -30,11 +29,9 @@ impl WebDriverClientExtension for Client {
                 }
                 throw 'no such element';
             ",
-                vec![json!(x), json!(y)],
-            )
-            .await;
-
-        res
+            vec![json!(x), json!(y)],
+        )
+        .await
     }
 }
 
