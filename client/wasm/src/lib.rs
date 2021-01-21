@@ -2,18 +2,13 @@ extern crate alloc;
 
 mod app;
 
-use wasm_bindgen::prelude::wasm_bindgen;
+use typescript_wasm_bindgen::typescript_wasm_bindgen;
+use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen(module = "proto/AuthServiceClientPb")]
-extern "C" {
-    type AuthClient;
-
-    #[wasm_bindgen(constructor)]
-    fn new(hostname: &str) -> AuthClient;
-}
+typescript_wasm_bindgen!("client/src/proto/AuthServiceClientPb.ts", "proto/AuthServiceClientPb");
 
 #[wasm_bindgen(start)]
 pub fn main() {
@@ -22,7 +17,7 @@ pub fn main() {
     #[cfg(debug_assertions)]
     console_log::init_with_level(log::Level::Trace).unwrap();
 
-    let _ = AuthClient::new("test");
+    let _ = AuthClient::new("test", JsValue::NULL, JsValue::NULL);
 
     yew::start_app::<app::App>();
 }

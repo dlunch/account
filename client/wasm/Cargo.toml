@@ -20,6 +20,8 @@ console_error_panic_hook = { version = "^0.1", default-features = false }
 console_log = { version = "0.2", features = ["color"], default-features = false }
 log = { version = "0.4", default-features = false }
 
+typescript-wasm-bindgen = { git = "https://github.com/dlunch/typescript-wasm-bindgen", branch = "main" }
+
 [dev-dependencies]
 pretty_env_logger = { version = "^0.4", default-features = false }
 wasm-bindgen-test = { version = "^0.3", default-features = false }
