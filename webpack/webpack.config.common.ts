@@ -1,12 +1,10 @@
 import * as webpack from 'webpack';
 import * as path from 'path';
-import * as RawWasmPackPlugin from '@wasm-tool/wasm-pack-plugin';
+import * as WasmPackPlugin from '@wasm-tool/wasm-pack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import * as HtmlEntryLoader from 'html-entry-loader';
-import * as GrpcWebPlugin from 'grpc-webpack-plugin';
-
-const WasmPackPlugin = RawWasmPackPlugin as unknown as new (options: RawWasmPackPlugin.WasmPackPluginOptions) => webpack.WebpackPluginInstance;
+import * as WebpackShellPluginNext from 'webpack-shell-plugin-next';
 
 const root = path.resolve(__dirname, '..');
 const dist = path.resolve(root, 'client/dist');
@@ -66,16 +64,19 @@ const configuration: webpack.Configuration = {
   plugins: [
     new HtmlEntryLoader.EntryExtractPlugin(),
 
-    new GrpcWebPlugin({
-      protoPath: path.resolve(root, 'proto'),
-      protoFiles: ['auth.proto'],
-      outputType: 'grpc-web',
-      importStyle: 'typescript',
-      binary: true,
-      outDir: path.resolve('client/src/proto'),
-      extra: [`--js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
+    new (WebpackShellPluginNext as any)({
+      onBuildStart: {
+        scripts: [
+          `protoc-gen-grpc-web -I ${path.resolve(root, 'proto')} auth.proto`
+            + `--js_out=import_style = commonjs, binary: ${path.resolve('client/src/proto')}`
+            + `--grpc - web_out=import_style = typescript, mode = grpcweb: ${path.resolve('client/src/proto')}`,
+        ],
+      },
     }),
-    new WasmPackPlugin({
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
+    new (WasmPackPlugin as any)({
       crateDirectory: path.resolve(root, 'client/wasm'),
       outDir: path.resolve(root, 'client/wasm/pkg'),
       outName: 'index',

@@ -24,13 +24,12 @@
     "eslint-plugin-import": "^2.20.2",
     "google-protobuf": "^3.14.0",
     "grpc-web": "^1.2.1",
-    "grpc-webpack-plugin": "^0.2.78",
     "html-entry-loader": "git+https://github.com/dlunch/html-entry-loader.git",
     "less": "^4.0.0",
     "less-loader": "^7.0.2",
     "mini-css-extract-plugin": "^1.2.1",
     "prettier": "^2.1.2",
-    "protoc-gen-grpc-web": "^1.2.0",
+    "protoc-gen-grpc-web": "^1.2.1",
     "style-loader": "^2.0.0",
     "ts-loader": "^8.0.7",
     "ts-node": "^9.0.0",
@@ -40,6 +39,7 @@
     "webpack": "^5.3.1",
     "webpack-cli": "^4.1.0",
     "webpack-dev-server": "^3.11.0",
-    "webpack-merge": "^5.1.4"
+    "webpack-merge": "^5.1.4",
+    "webpack-shell-plugin-next": "^2.1.1"
   }
 }
