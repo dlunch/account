@@ -17,7 +17,8 @@ pub fn main() {
     #[cfg(debug_assertions)]
     console_log::init_with_level(log::Level::Trace).unwrap();
 
-    let _ = AuthClient::new("test", JsValue::NULL, JsValue::NULL);
+    let auth_client = AuthClient::new("test", JsValue::NULL, JsValue::NULL);
+    auth_client.login(JsValue::NULL, JsValue::NULL, JsValue::NULL);
 
     yew::start_app::<app::App>();
 }
