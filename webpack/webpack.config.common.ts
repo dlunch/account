@@ -66,7 +66,7 @@ const configuration: webpack.Configuration = {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
     new (WebpackShellPluginNext as any)({
-      onBuildStart: {
+      onBeforeNormalRun: {
         scripts: [
           `protoc-gen-grpc -I=${path.resolve(root, 'proto')} auth.proto`
             + ` --js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`
