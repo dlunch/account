@@ -68,7 +68,7 @@ const configuration: webpack.Configuration = {
     new (WebpackShellPluginNext as any)({
       onBeforeNormalRun: {
         scripts: [
-          `node node_modules/.bin/protoc-gen-grpc -I=${path.resolve(root, 'proto')} auth.proto`
+          `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -I=${path.resolve(root, 'proto')} auth.proto`
             + ` --js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`
             + ` --grpc-web_out=import_style=typescript,mode=grpcweb:${path.resolve('client/src/proto')}`,
         ],
