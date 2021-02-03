@@ -9,6 +9,7 @@ use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 typescript_wasm_bindgen!("client/src/proto/AuthServiceClientPb.ts", "proto/AuthServiceClientPb");
+typescript_wasm_bindgen!("client/src/proto/auth_pb.d.ts", "proto/auth_pb");
 
 #[wasm_bindgen(start)]
 pub fn main() {
@@ -17,8 +18,9 @@ pub fn main() {
     #[cfg(debug_assertions)]
     console_log::init_with_level(log::Level::Trace).unwrap();
 
-    let auth_client = AuthClient::new("test", JsValue::NULL, JsValue::NULL);
-    auth_client.login(JsValue::NULL, JsValue::NULL, JsValue::NULL);
+    let auth_client = AuthClient::new("http://localhost:8000", JsValue::NULL, JsValue::NULL);
+    let login_request = LoginRequest::new();
+    auth_client.login(JsValue::from(login_request), JsValue::NULL, JsValue::UNDEFINED);
 
     yew::start_app::<app::App>();
 }
