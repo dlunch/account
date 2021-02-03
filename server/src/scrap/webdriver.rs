@@ -1,6 +1,6 @@
 use std::env;
 
-use fantoccini::Client;
+use fantoccini::{Client, ClientBuilder};
 use serde_json::json;
 use webdriver::capabilities::Capabilities;
 
@@ -15,7 +15,5 @@ pub async fn create_webdriver_client() -> Client {
     }
     cap.insert("acceptInsecureCerts".into(), json!(true));
 
-    Client::with_capabilities(&webdriver_host, cap)
-        .await
-        .expect("failed to connect to WebDriver")
+    ClientBuilder::native().capabilities(cap).connect(&webdriver_host).await.unwrap()
 }

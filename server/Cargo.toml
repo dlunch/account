@@ -5,7 +5,7 @@ authors = ["Inseok Lee <dlunch@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-fantoccini = { version = "^0.17", default-features = false }
+fantoccini = { version = "^0.17", features = ["native-tls"], default-features = false }
 webdriver = { version = "^0.43", default-features = false }
 async-std = { version = "^1.7", features = ["tokio02", "attributes"] }
 serde_json = { version = "^1.0", default-features = false }
