@@ -44,8 +44,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-${{ matrix.targets.tag }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-${{ matrix.targets.tag }}-buildx-
+          key: ${{ runner.os }}-${{ matrix.targets.tag }}-${{ hashFiles('**/Cargo.lock') }}-buildx-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ matrix.targets.tag }}-${{ hashFiles('**/Cargo.lock') }}-buildx-
 
       - name: Docker Login
         run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
