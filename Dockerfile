@@ -22,4 +22,7 @@ RUN --mount=type=cache,target=/src/target cargo install --path server --locked -
 FROM debian:stretch-slim
 COPY --from=builder /src/build/bin /server
 
-EXPOSE 6667
+RUN apt update -y && apt install libssl1.1 && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 9090
+ENTRYPOINT "/server/server"
