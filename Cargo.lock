@@ -360,7 +360,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "888604f00b3db336d2af898ec3c1d5d0ddf5e6d462220f2ededc33a87ac4bbd5"
 dependencies = [
- "time 0.1.44",
+ "time 0.1.43",
 ]
 
 [[package]]
@@ -706,7 +706,7 @@ checksum = "c9495705279e7140bf035dde1f6e750c162df8b625267cd52cc44e0b156732c8"
 dependencies = [
  "cfg-if 1.0.0",
  "libc",
- "wasi 0.10.0+wasi-snapshot-preview1",
+ "wasi 0.10.2+wasi-snapshot-preview1",
 ]
 
 [[package]]
@@ -858,7 +858,7 @@ dependencies = [
  "httparse",
  "httpdate",
  "itoa",
- "pin-project 1.0.4",
+ "pin-project 1.0.5",
  "socket2",
  "tokio 1.1.1",
  "tower-service",
@@ -1201,11 +1201,11 @@ dependencies = [
 
 [[package]]
 name = "pin-project"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95b70b68509f17aa2857863b6fa00bf21fc93674c7a8893de2f469f6aa7ca2f2"
+checksum = "96fa8ebb90271c4477f144354485b8068bd8f6b78b428b01ba892ca26caf0b63"
 dependencies = [
- "pin-project-internal 1.0.4",
+ "pin-project-internal 1.0.5",
 ]
 
 [[package]]
@@ -1221,9 +1221,9 @@ dependencies = [
 
 [[package]]
 name = "pin-project-internal"
-version = "1.0.4"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "caa25a6393f22ce819b0f50e0be89287292fda8d425be38ee0ca14c4931d9e71"
+checksum = "758669ae3558c6f74bd2a18b41f7ac0b5a195aea6639d6a9b5e5d1ad5ba24c0b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1519,6 +1519,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
 
 [[package]]
+name = "scrap"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "fantoccini",
+ "maplit",
+ "serde_json",
+ "webdriver",
+]
+
+[[package]]
 name = "security-framework"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1592,12 +1604,8 @@ name = "server"
 version = "0.1.0"
 dependencies = [
  "async-std",
- "async-trait",
  "dotenv",
- "fantoccini",
- "maplit",
- "serde_json",
- "webdriver",
+ "scrap",
 ]
 
 [[package]]
@@ -1936,12 +1944,11 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.1.44"
+version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6db9e6914ab8b1ae1c260a4ae7a49b6c5611b40328a735b21862567685e73255"
+checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
 dependencies = [
  "libc",
- "wasi 0.10.0+wasi-snapshot-preview1",
  "winapi",
 ]
 
@@ -2220,9 +2227,9 @@ checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 
 [[package]]
 name = "wasi"
-version = "0.10.0+wasi-snapshot-preview1"
+version = "0.10.2+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a143597ca7c7793eff794def352d41792a93c481eb1042423ff7ff72ba2c31f"
+checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
 
 [[package]]
 name = "wasm-bindgen"
@@ -2338,7 +2345,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "time 0.1.44",
+ "time 0.1.43",
  "unicode-segmentation",
  "url",
 ]

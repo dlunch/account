@@ -1,5 +1,3 @@
-mod scrap;
-
 use std::boxed::Box;
 use std::env;
 use std::error::Error;
