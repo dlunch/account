@@ -13,6 +13,7 @@ struct Auth {}
 impl pb::auth_server::Auth for Auth {
     async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
         let username = request.into_inner().username;
+        println!("username: {}", username);
 
         Ok(Response::new(LoginResponse { token: username }))
     }
@@ -20,6 +21,8 @@ impl pb::auth_server::Auth for Auth {
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    pretty_env_logger::init();
+
     let addr = "[::1]:9090".parse().unwrap();
     let auth = Auth {};
 

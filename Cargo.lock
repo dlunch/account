@@ -323,13 +323,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8100e46ff92eb85bf6dc2930c73f2a4f7176393c84a9446b3d501e1b354e7b34"
 
 [[package]]
+name = "chrono"
+version = "0.4.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
+dependencies = [
+ "libc",
+ "num-integer",
+ "num-traits",
+ "time 0.1.43",
+ "winapi",
+]
+
+[[package]]
 name = "client"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
  "log",
- "pretty_env_logger",
+ "pretty_env_logger 0.4.0",
  "typescript-wasm-bindgen",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -495,6 +508,19 @@ dependencies = [
  "proc-macro2",
  "swc_macros_common",
  "syn",
+]
+
+[[package]]
+name = "env_logger"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aafcde04e90a5226a6443b7aabdb016ba2f8307c847d524724bd9b346dd1a2d3"
+dependencies = [
+ "atty",
+ "humantime",
+ "log",
+ "regex",
+ "termcolor",
 ]
 
 [[package]]
@@ -1347,11 +1373,22 @@ checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 
 [[package]]
 name = "pretty_env_logger"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "717ee476b1690853d222af4634056d830b5197ffd747726a9a1eee6da9f49074"
+dependencies = [
+ "chrono",
+ "env_logger 0.6.2",
+ "log",
+]
+
+[[package]]
+name = "pretty_env_logger"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "926d36b9553851b8b0005f1275891b392ee4d2d833852c417ed025477350fb9d"
 dependencies = [
- "env_logger",
+ "env_logger 0.7.1",
  "log",
 ]
 
@@ -1712,6 +1749,8 @@ dependencies = [
  "async-std",
  "async-trait",
  "dotenv",
+ "log",
+ "pretty_env_logger 0.3.1",
  "prost",
  "scrap",
  "tonic",
