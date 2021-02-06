@@ -1,12 +1,7 @@
 version: "3.8"
 services:
-  server:
-    build: .
-    ports:
-      - 9090:9090
   envoy:
+    network_mode: host
     image: envoyproxy/envoy:v1.17-latest
-    ports:
-      - 8080:8080
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
