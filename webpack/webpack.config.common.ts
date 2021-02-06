@@ -9,6 +9,10 @@ import * as WebpackShellPluginNext from 'webpack-shell-plugin-next';
 const root = path.resolve(__dirname, '..');
 const dist = path.resolve(root, 'client/dist');
 
+const grpcWebBuild = `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -I=${path.resolve(root, 'proto')} auth.proto`
+  + ` --js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`
+  + ` --grpc-web_out=import_style=typescript,mode=grpcweb:${path.resolve('client/src/proto')}`;
+
 const configuration: webpack.Configuration = {
   context: root,
   entry: {
@@ -67,11 +71,13 @@ const configuration: webpack.Configuration = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
     new (WebpackShellPluginNext as any)({
       onBeforeNormalRun: {
-        scripts: [
-          `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -I=${path.resolve(root, 'proto')} auth.proto`
-            + ` --js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`
-            + ` --grpc-web_out=import_style=typescript,mode=grpcweb:${path.resolve('client/src/proto')}`,
-        ],
+        scripts: [grpcWebBuild],
+      },
+      onWatchRun: {
+        scripts: [grpcWebBuild],
+      },
+      onBeforeBuild: {
+        scripts: [grpcWebBuild],
       },
     }),
 
