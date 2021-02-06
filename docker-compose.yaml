@@ -5,6 +5,3 @@ services:
     image: envoyproxy/envoy:v1.17-latest
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
-    command:
-      - "-l debug"
-      - "-c /etc/envoy/envoy.yaml"
