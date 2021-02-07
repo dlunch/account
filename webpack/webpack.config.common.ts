@@ -1,10 +1,12 @@
 import * as webpack from 'webpack';
 import * as path from 'path';
-import * as WasmPackPlugin from '@wasm-tool/wasm-pack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import * as HtmlEntryLoader from 'html-entry-loader';
 import * as WebpackShellPluginNext from 'webpack-shell-plugin-next';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 const root = path.resolve(__dirname, '..');
 const dist = path.resolve(root, 'client/dist');
@@ -81,8 +83,8 @@ const configuration: webpack.Configuration = {
       },
     }),
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
-    new (WasmPackPlugin as any)({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    new WasmPackPlugin({
       crateDirectory: path.resolve(root, 'client/wasm'),
       outDir: path.resolve(root, 'client/wasm/pkg'),
       outName: 'index',
