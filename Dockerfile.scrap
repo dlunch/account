@@ -5,8 +5,8 @@ RUN curl -O https://safetx.ahnlab.com/master/linux/astx_u64.deb
 RUN dpkg --force-all -i ./astx_u64.deb
 
 WORKDIR /
-COPY . .
+COPY docker/astx.sh .
 
 # astx
 EXPOSE 55920:55930
-ENTRYPOINT ["/scripts/astx.sh"]
+ENTRYPOINT ["./astx.sh"]

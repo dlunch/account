@@ -11,10 +11,10 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf
   envoy:
     image: envoyproxy/envoy:v1.17-latest
     ports:
       - 8000:8000
     volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml
+      - ./docker/envoy.yaml:/etc/envoy/envoy.yaml
