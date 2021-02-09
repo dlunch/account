@@ -4,8 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.server
-    ports:
-      - 9090:9090
   client:
     build:
       context: .
