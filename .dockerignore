@@ -2,4 +2,4 @@ target
 node_modules
 client/dist
 .git
-Dockerfile
+Dockerfile*

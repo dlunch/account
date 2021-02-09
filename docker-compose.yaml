@@ -1,7 +1,22 @@
 version: "3.8"
 services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - 9090:9090
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
   envoy:
-    network_mode: host
     image: envoyproxy/envoy:v1.17-latest
+    ports:
+      - 8000:8000
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
