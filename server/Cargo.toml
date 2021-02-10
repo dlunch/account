@@ -12,6 +12,7 @@ tonic = { version = "^0.4", features = ["transport", "codegen", "prost"], defaul
 prost = { version = "^0.7", default-features = false }
 log = { version = "^0.4", default-features = false }
 pretty_env_logger = { version = "^0.3", default-features = false }
+diesel = { version = "^1.4", features = ["postgres"], default-features = false  }
 
 scrap = { path = "../scrap" }
 
