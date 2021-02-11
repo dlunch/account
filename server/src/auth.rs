@@ -41,7 +41,7 @@ impl pb::auth_server::Auth for Auth {
 
         let user = schema::users::dsl::users
             .filter(schema::users::dsl::username.eq(&request.username))
-            .first::<models::Users>(&self.pool.get().unwrap())
+            .first::<models::User>(&self.pool.get().unwrap())
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
         let hash = argon2::hash_encoded(request.password.as_bytes(), &self.salt, &Config::default()).unwrap();
