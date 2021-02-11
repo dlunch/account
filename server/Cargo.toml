@@ -18,6 +18,7 @@ uuid = { version = "^0.6", features = ["v4"], default-features = false }
 jsonwebtoken = { version = "^7", default-features = false }
 serde = { version = "^1.0", features = ["derive"], default-features = false }
 envy = { version = "^0.4", default-features = false }
+async-diesel = { version = "^0.1", default-features = false }
 
 scrap = { path = "../scrap" }
 

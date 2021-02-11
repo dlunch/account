@@ -1,8 +1,9 @@
+use async_diesel::AsyncRunQueryDsl;
 use async_trait::async_trait;
 use diesel::{
     insert_into,
     r2d2::{ConnectionManager, Pool},
-    ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+    ExpressionMethods, PgConnection, QueryDsl,
 };
 use tonic::{Code, Request, Response, Status};
 use uuid::Uuid;
@@ -39,8 +40,9 @@ impl pb::auth_server::Auth for AuthHandler {
         let request = request.into_inner();
 
         let user = dsl::users
-            .filter(dsl::username.eq(&request.username))
-            .first::<models::User>(&self.pool.get().unwrap())
+            .filter(dsl::username.eq(request.username))
+            .first_async::<models::User>(&self.pool)
+            .await
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
         let password_hash = self.hash_password(&request.password);
@@ -66,7 +68,7 @@ impl pb::auth_server::Auth for AuthHandler {
             password: password_hash.into_bytes(),
         };
 
-        insert_into(dsl::users).values(&user).execute(&self.pool.get().unwrap()).unwrap();
+        insert_into(dsl::users).values(user).execute_async(&self.pool).await.unwrap();
 
         Ok(Response::new(()))
     }

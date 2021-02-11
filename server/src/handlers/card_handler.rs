@@ -1,7 +1,8 @@
+use async_diesel::AsyncRunQueryDsl;
 use async_trait::async_trait;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
-    ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
+    ExpressionMethods, PgConnection, QueryDsl,
 };
 use tonic::{Response, Status};
 
@@ -38,7 +39,8 @@ impl pb::card_server::Card for CardHandler {
 
         let cards = dsl::cards
             .filter(dsl::user_id.eq(user_id))
-            .load::<models::Card>(&self.pool.get().unwrap())
+            .load_async::<models::Card>(&self.pool)
+            .await
             .unwrap();
 
         let items = cards
