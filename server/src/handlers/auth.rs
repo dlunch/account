@@ -7,7 +7,7 @@ use diesel::{
 use tonic::{Code, Request, Response, Status};
 use uuid::Uuid;
 
-use super::token;
+use super::base;
 use crate::config::Config;
 use crate::db::models;
 use crate::db::schema::users::dsl;
@@ -49,7 +49,7 @@ impl pb::auth_server::Auth for Auth {
         if (!matches) {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
         } else {
-            let token = token::create(&user.id.to_string(), &self.config.token_secret);
+            let token = base::create_token(&user.id.to_string(), &self.config.token_secret);
 
             Ok(Response::new(LoginResponse { token }))
         }
