@@ -1,6 +1,3 @@
-use std::env;
-
-use argon2::{self, Config};
 use async_trait::async_trait;
 use diesel::{
     insert_into,
@@ -10,6 +7,7 @@ use diesel::{
 use tonic::{Code, Request, Response, Status};
 use uuid::Uuid;
 
+use super::config::Config;
 use super::models;
 use super::schema;
 use super::token;
@@ -22,20 +20,16 @@ use pb::{LoginRequest, LoginResponse, RegisterRequest};
 
 pub struct Auth {
     pool: Pool<ConnectionManager<PgConnection>>,
-    salt: Vec<u8>,
+    config: Config,
 }
 
 impl Auth {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> pb::auth_server::AuthServer<Self> {
-        let salt = env::var("SALT").unwrap();
-        pb::auth_server::AuthServer::new(Self {
-            pool,
-            salt: salt.into_bytes(),
-        })
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::auth_server::AuthServer<Auth> {
+        pb::auth_server::AuthServer::new(Self { pool, config })
     }
 
     fn hash_password(&self, password: &str) -> String {
-        argon2::hash_encoded(password.as_bytes(), &self.salt, &Config::default()).unwrap()
+        argon2::hash_encoded(password.as_bytes(), self.config.password_salt.as_bytes(), &argon2::Config::default()).unwrap()
     }
 }
 
@@ -57,7 +51,7 @@ impl pb::auth_server::Auth for Auth {
         if (!matches) {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
         } else {
-            let token = token::create(user.id.to_string());
+            let token = token::create(user.id.to_string(), &self.config.jwt_secret);
 
             Ok(Response::new(LoginResponse { token }))
         }

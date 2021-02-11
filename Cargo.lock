@@ -591,6 +591,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "envy"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f47e0157f2cb54f5ae1bd371b30a2ae4311e1c028f575cd4e81de7353215965"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "event-listener"
 version = "2.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1973,6 +1982,7 @@ dependencies = [
  "async-trait",
  "diesel",
  "dotenv",
+ "envy",
  "jsonwebtoken",
  "log",
  "pretty_env_logger 0.3.1",

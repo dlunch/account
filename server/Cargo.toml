@@ -15,8 +15,9 @@ pretty_env_logger = { version = "^0.3", default-features = false }
 diesel = { version = "^1.4", features = ["postgres", "uuid", "r2d2"], default-features = false }
 rust-argon2 = { version = "^0.8", default-features = false }
 uuid = { version = "^0.6", features = ["v4"], default-features = false }
-jsonwebtoken = { version = "7", default-features = false }
-serde = {version = "1.0", features = ["derive"], default-features = false }
+jsonwebtoken = { version = "^7", default-features = false }
+serde = { version = "^1.0", features = ["derive"], default-features = false }
+envy = { version = "^0.4", default-features = false }
 
 scrap = { path = "../scrap" }
 
