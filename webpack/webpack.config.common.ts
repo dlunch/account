@@ -11,7 +11,7 @@ const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const root = path.resolve(__dirname, '..');
 const dist = path.resolve(root, 'client/dist');
 
-const grpcWebBuild = `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -I=${path.resolve(root, 'proto')} auth.proto`
+const grpcWebBuild = `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -I=${path.resolve(root, 'node_modules/protoc/protoc/include')} -I=${path.resolve(root, 'proto')} auth.proto`
   + ` --js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`
   + ` --grpc-web_out=import_style=typescript,mode=grpcweb:${path.resolve('client/src/proto')}`;
 
