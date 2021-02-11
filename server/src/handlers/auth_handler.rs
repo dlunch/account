@@ -62,13 +62,15 @@ impl pb::auth_server::Auth for AuthHandler {
 
         let password_hash = self.hash_password(&request.password);
 
-        let user = models::User {
-            id: Uuid::new_v4(),
-            username: request.username,
-            password: password_hash.into_bytes(),
-        };
-
-        insert_into(dsl::users).values(user).execute_async(&self.pool).await.unwrap();
+        insert_into(dsl::users)
+            .values((
+                dsl::id.eq(Uuid::new_v4()),
+                dsl::username.eq(request.username),
+                dsl::password.eq(password_hash.into_bytes()),
+            ))
+            .execute_async(&self.pool)
+            .await
+            .unwrap();
 
         Ok(Response::new(()))
     }
