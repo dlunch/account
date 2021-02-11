@@ -3,7 +3,7 @@ use std::str::{self, FromStr};
 use tonic::{metadata::MetadataValue, Request, Status};
 use uuid::Uuid;
 
-use crate::token;
+use super::token;
 
 pub fn check_auth(mut request: Request<()>, token_secret: &str) -> Result<Request<()>, Status> {
     if let Some(authorization) = request.metadata().get("authorization") {

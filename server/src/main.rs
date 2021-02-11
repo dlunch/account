@@ -2,10 +2,8 @@
 extern crate diesel;
 
 mod config;
+mod db;
 mod handlers;
-mod models;
-mod schema;
-mod token;
 
 use diesel::{
     r2d2::{ConnectionManager, Pool},

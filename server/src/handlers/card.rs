@@ -6,8 +6,8 @@ use diesel::{
 use tonic::{Response, Status};
 
 use crate::config::Config;
-use crate::models;
-use crate::schema;
+use crate::db::models;
+use crate::db::schema;
 
 use super::base;
 
