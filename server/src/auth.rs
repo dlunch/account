@@ -33,6 +33,10 @@ impl Auth {
             salt: salt.into_bytes(),
         })
     }
+
+    fn hash_password(&self, password: &str) -> String {
+        argon2::hash_encoded(password.as_bytes(), &self.salt, &Config::default()).unwrap()
+    }
 }
 
 #[async_trait]
@@ -47,7 +51,7 @@ impl pb::auth_server::Auth for Auth {
             .first::<models::User>(&self.pool.get().unwrap())
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
-        let password_hash = argon2::hash_encoded(request.password.as_bytes(), &self.salt, &Config::default()).unwrap();
+        let password_hash = self.hash_password(&request.password);
         let matches = argon2::verify_encoded(&password_hash, &user.password).unwrap();
 
         if (!matches) {
@@ -64,7 +68,7 @@ impl pb::auth_server::Auth for Auth {
 
         let request = request.into_inner();
 
-        let password_hash = argon2::hash_encoded(request.password.as_bytes(), &self.salt, &Config::default()).unwrap();
+        let password_hash = self.hash_password(&request.password);
 
         let user = models::User {
             id: Uuid::new_v4(),
