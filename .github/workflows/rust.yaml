@@ -57,6 +57,11 @@ jobs:
           override: true
           components: rustfmt, clippy
 
+      - name: Install required packages
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install postgresql
+
       - name: install wasm-pack
         uses: jetli/wasm-pack-action@v0.3.0
         with:
