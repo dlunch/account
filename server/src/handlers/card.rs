@@ -8,10 +8,10 @@ use diesel::{
 use tonic::{metadata::MetadataValue, Request, Response, Status};
 use uuid::Uuid;
 
-use super::config::Config;
-use super::models;
-use super::schema;
-use super::token;
+use crate::config::Config;
+use crate::models;
+use crate::schema;
+use crate::token;
 
 mod pb {
     tonic::include_proto!("card");

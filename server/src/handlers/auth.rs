@@ -7,10 +7,10 @@ use diesel::{
 use tonic::{Code, Request, Response, Status};
 use uuid::Uuid;
 
-use super::config::Config;
-use super::models;
-use super::schema::users::dsl;
-use super::token;
+use crate::config::Config;
+use crate::models;
+use crate::schema::users::dsl;
+use crate::token;
 
 mod pb {
     tonic::include_proto!("auth");
