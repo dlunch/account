@@ -21,8 +21,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
     let pool = Pool::builder().build(manager).unwrap();
 
-    let auth_service = handlers::Auth::new(pool.clone(), config.clone());
-    let card_service = handlers::Card::new(pool.clone(), config.clone());
+    let auth_service = handlers::AuthHandler::new(pool.clone(), config.clone());
+    let card_service = handlers::CardHandler::new(pool.clone(), config.clone());
 
     let addr = config.listen_addr.parse().unwrap();
     Server::builder().add_service(auth_service).add_service(card_service).serve(addr).await?;

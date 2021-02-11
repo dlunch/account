@@ -17,12 +17,12 @@ mod pb {
 
 use pb::{CardItem, CardListResponse};
 
-pub struct Card {
+pub struct CardHandler {
     pool: Pool<ConnectionManager<PgConnection>>,
 }
 
-impl Card {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::card_server::CardServer<Card> {
+impl CardHandler {
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
 
         pb::card_server::CardServer::with_interceptor(Self { pool }, move |req| base::check_auth(req, &token_secret))
@@ -30,7 +30,7 @@ impl Card {
 }
 
 #[async_trait]
-impl pb::card_server::Card for Card {
+impl pb::card_server::Card for CardHandler {
     async fn list(&self, request: tonic::Request<()>) -> Result<Response<CardListResponse>, Status> {
         use schema::cards::dsl;
 
