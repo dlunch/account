@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use super::config::Config;
 use super::models;
-use super::schema;
+use super::schema::users::dsl;
 use super::token;
 
 mod pb {
@@ -36,12 +36,10 @@ impl Auth {
 #[async_trait]
 impl pb::auth_server::Auth for Auth {
     async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
-        use schema::users::dsl::*;
-
         let request = request.into_inner();
 
-        let user = users
-            .filter(username.eq(&request.username))
+        let user = dsl::users
+            .filter(dsl::username.eq(&request.username))
             .first::<models::User>(&self.pool.get().unwrap())
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
@@ -58,8 +56,6 @@ impl pb::auth_server::Auth for Auth {
     }
 
     async fn register(&self, request: Request<RegisterRequest>) -> Result<Response<()>, Status> {
-        use schema::users::dsl::*;
-
         let request = request.into_inner();
 
         let password_hash = self.hash_password(&request.password);
@@ -70,7 +66,7 @@ impl pb::auth_server::Auth for Auth {
             password: password_hash.into_bytes(),
         };
 
-        insert_into(users).values(&user).execute(&self.pool.get().unwrap()).unwrap();
+        insert_into(dsl::users).values(&user).execute(&self.pool.get().unwrap()).unwrap();
 
         Ok(Response::new(()))
     }
