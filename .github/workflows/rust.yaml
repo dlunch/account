@@ -57,10 +57,9 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      - name: Install required packages
+      - name: Set postgres directory
         if: matrix.os == 'windows-latest'
-        run: |
-          choco install postgresql
+        run: echo "PQ_LIB_DIR=C:\Program Files\PostgreSQL\13\lib" >> $env:GITHUB_ENV
 
       - name: install wasm-pack
         uses: jetli/wasm-pack-action@v0.3.0
