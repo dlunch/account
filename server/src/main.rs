@@ -5,10 +5,6 @@ mod config;
 mod db;
 mod handlers;
 
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    PgConnection,
-};
 use tonic::transport::Server;
 
 #[async_std::main]
@@ -17,9 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().ok();
 
     let config = envy::from_env::<config::Config>()?;
-
-    let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
-    let pool = Pool::builder().build(manager).unwrap();
+    let pool = db::create_pool(&config);
 
     let auth_service = handlers::AuthHandler::new(pool.clone(), config.clone());
     let card_service = handlers::CardHandler::new(pool.clone(), config.clone());
