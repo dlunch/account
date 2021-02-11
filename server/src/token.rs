@@ -22,6 +22,7 @@ pub fn create(user_id: String, secret: &str) -> String {
     jsonwebtoken::encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_ref())).unwrap()
 }
 
+#[allow(dead_code)]
 pub fn decode(token: String, secret: &str) -> String {
     jsonwebtoken::decode::<Claims>(
         &token,
