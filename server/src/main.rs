@@ -2,6 +2,7 @@
 extern crate diesel;
 
 mod auth;
+mod card;
 mod config;
 mod models;
 mod schema;
@@ -24,9 +25,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool = Pool::builder().build(manager).unwrap();
 
     let auth_service = auth::Auth::new(pool.clone(), config.clone());
+    let card_service = card::Card::new(pool.clone(), config.clone());
 
     let addr = config.listen_addr.parse().unwrap();
-    Server::builder().add_service(auth_service).serve(addr).await?;
+    Server::builder().add_service(auth_service).add_service(card_service).serve(addr).await?;
 
     Ok(())
 }

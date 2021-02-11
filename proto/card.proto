@@ -1,0 +1,14 @@
+syntax = "proto3";
+package card;
+
+import "google/protobuf/empty.proto";
+
+message CardItem {
+  string id = 1;
+  string type = 2;
+  string display_name = 3;
+}
+
+message CardListResponse { repeated CardItem items = 1; }
+
+service Card { rpc List(google.protobuf.Empty) returns (CardListResponse); }

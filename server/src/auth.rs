@@ -51,7 +51,7 @@ impl pb::auth_server::Auth for Auth {
         if (!matches) {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
         } else {
-            let token = token::create(user.id.to_string(), &self.config.token_secret);
+            let token = token::create(&user.id.to_string(), &self.config.token_secret);
 
             Ok(Response::new(LoginResponse { token }))
         }
