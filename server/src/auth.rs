@@ -1,5 +1,4 @@
 use std::env;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use argon2::{self, Config};
 use async_trait::async_trait;
@@ -54,13 +53,7 @@ impl pb::auth_server::Auth for Auth {
         if (!matches) {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
         } else {
-            let now = SystemTime::now();
-            let exp = now + Duration::from_secs(60 * 60);
-            let token = token::encode(token::Claims {
-                sub: user.id.to_string(),
-                exp: exp.duration_since(UNIX_EPOCH).unwrap().as_secs() as usize,
-                nbf: now.duration_since(UNIX_EPOCH).unwrap().as_secs() as usize,
-            });
+            let token = token::create(user.id.to_string());
 
             Ok(Response::new(LoginResponse { token }))
         }
