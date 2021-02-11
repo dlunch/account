@@ -4,10 +4,12 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use argon2::{self, Config};
 use async_trait::async_trait;
 use diesel::{
+    insert_into,
     r2d2::{ConnectionManager, Pool},
     ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl,
 };
 use tonic::{Code, Request, Response, Status};
+use uuid::Uuid;
 
 use super::models;
 use super::schema;
@@ -17,7 +19,7 @@ mod pb {
     tonic::include_proto!("auth");
 }
 
-use pb::{LoginRequest, LoginResponse};
+use pb::{LoginRequest, LoginResponse, RegisterRequest};
 
 pub struct Auth {
     pool: Pool<ConnectionManager<PgConnection>>,
@@ -37,15 +39,17 @@ impl Auth {
 #[async_trait]
 impl pb::auth_server::Auth for Auth {
     async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
+        use schema::users::dsl::*;
+
         let request = request.into_inner();
 
-        let user = schema::users::dsl::users
-            .filter(schema::users::dsl::username.eq(&request.username))
+        let user = users
+            .filter(username.eq(&request.username))
             .first::<models::User>(&self.pool.get().unwrap())
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
-        let hash = argon2::hash_encoded(request.password.as_bytes(), &self.salt, &Config::default()).unwrap();
-        let matches = argon2::verify_encoded(&hash, &user.password).unwrap();
+        let password_hash = argon2::hash_encoded(request.password.as_bytes(), &self.salt, &Config::default()).unwrap();
+        let matches = argon2::verify_encoded(&password_hash, &user.password).unwrap();
 
         if (!matches) {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
@@ -60,5 +64,23 @@ impl pb::auth_server::Auth for Auth {
 
             Ok(Response::new(LoginResponse { token }))
         }
+    }
+
+    async fn register(&self, request: Request<RegisterRequest>) -> Result<Response<()>, Status> {
+        use schema::users::dsl::*;
+
+        let request = request.into_inner();
+
+        let password_hash = argon2::hash_encoded(request.password.as_bytes(), &self.salt, &Config::default()).unwrap();
+
+        let user = models::User {
+            id: Uuid::new_v4(),
+            username: request.username,
+            password: password_hash.into_bytes(),
+        };
+
+        insert_into(users).values(&user).execute(&self.pool.get().unwrap()).unwrap();
+
+        Ok(Response::new(()))
     }
 }

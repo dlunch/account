@@ -1,6 +1,8 @@
 use uuid::Uuid;
 
-#[derive(Queryable)]
+use super::schema::users;
+
+#[derive(Queryable, Insertable)]
 pub struct User {
     pub id: Uuid,
     pub username: String,
