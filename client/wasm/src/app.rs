@@ -1,4 +1,8 @@
 use yew::prelude::{html, Component, ComponentLink, Html, ShouldRender};
+use yew_router::router::Router;
+
+use super::components;
+use super::route::AppRoute;
 
 pub struct App {}
 
@@ -22,9 +26,15 @@ impl Component for App {
 
     fn view(&self) -> Html {
         html! {
-            <div>
-               { "Hello, World!" }
-            </div>
+           <Router<AppRoute, ()>
+                render = Router::render(|switch: AppRoute| {
+                    match switch {
+                        AppRoute::Register => html!{<components::Register />},
+                        AppRoute::Login => html!{<components::Login />},
+                        AppRoute::Index => html!{<components::Index/>},
+                    }
+                })
+            />
         }
     }
 }

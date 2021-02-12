@@ -1,6 +1,8 @@
 extern crate alloc;
 
 mod app;
+mod components;
+mod route;
 
 use typescript_wasm_bindgen::typescript_wasm_bindgen;
 use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
