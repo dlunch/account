@@ -19,7 +19,7 @@ const grpcWebBuild = `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -
 const configuration: webpack.Configuration = {
   context: root,
   entry: {
-    client: 'client/src/client.html',
+    client: 'client/src/index.html',
   },
   experiments: {
     asyncWebAssembly: true,
