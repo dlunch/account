@@ -26,6 +26,7 @@ impl Component for Index {
         html! {
             <div class="index">
                 <AppAnchor route=AppRoute::Login> { "Login" } </AppAnchor>
+                <AppAnchor route=AppRoute::Register> { "Register" } </AppAnchor>
             </div>
         }
     }
