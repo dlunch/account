@@ -67,6 +67,7 @@ const configuration: webpack.Configuration = {
   },
   devServer: {
     contentBase: dist,
+    historyApiFallback: true,
   },
   plugins: [
     new HtmlEntryLoader.EntryExtractPlugin(),
