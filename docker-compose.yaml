@@ -9,6 +9,9 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
       - PASSWORD_SALT
       - TOKEN_SECRET
+    depends_on:
+      - db
+
   client:
     build:
       context: .
@@ -17,12 +20,16 @@ services:
       - 8080:80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
+
   envoy:
     image: envoyproxy/envoy:v1.17-latest
     ports:
       - 8000:8000
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
+    depends_on:
+      - server
+
   db:
     image: postgres:latest
     environment:
