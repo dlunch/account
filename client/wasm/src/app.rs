@@ -2,7 +2,7 @@ use yew::prelude::{html, Component, ComponentLink, Html, ShouldRender};
 use yew_router::router::Router;
 
 use super::components;
-use super::route::AppRoute;
+use super::router::AppRoute;
 
 pub struct App {}
 

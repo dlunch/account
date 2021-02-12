@@ -1,6 +1,6 @@
 use yew::prelude::{html, Component, ComponentLink, Html, ShouldRender};
 
-use crate::route::{AppAnchor, AppRoute};
+use crate::router::{AppAnchor, AppRoute};
 
 pub struct Index {}
 
