@@ -24,5 +24,4 @@ COPY --from=builder /src/build/bin /server
 
 RUN apt update -y && apt install libssl1.1 libpq5 -y && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 9090
 ENTRYPOINT "/server/server"

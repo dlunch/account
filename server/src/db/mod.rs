@@ -8,7 +8,13 @@ use diesel::{
 
 use super::config::Config;
 
+embed_migrations!();
+
 pub fn create_pool(config: &Config) -> Result<Pool<ConnectionManager<PgConnection>>, PoolError> {
     let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
-    Pool::builder().build(manager)
+    let pool = Pool::builder().build(manager)?;
+
+    embedded_migrations::run(&pool.get().unwrap()).unwrap();
+
+    Ok(pool)
 }

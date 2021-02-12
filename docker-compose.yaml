@@ -4,6 +4,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.server
+    environment:
+      - LISTEN_ADDR=0.0.0.0:9090
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      - PASSWORD_SALT
+      - TOKEN_SECRET
   client:
     build:
       context: .

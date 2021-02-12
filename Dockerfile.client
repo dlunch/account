@@ -1,7 +1,7 @@
 #syntax=docker/dockerfile:experimental
 # We have to use stretch for armv7 build due to https://bugs.launchpad.net/qemu/+bug/1805913, but docker rust:stretch doesn't have latest version, so we manually install rust on stretch
 
-FROM node:stretch as builder
+FROM node:lts-stretch as builder
 
 RUN apt-get update && apt-get install curl -y
 
@@ -22,6 +22,6 @@ RUN --mount=type=cache,target=/src/target --mount=type=cache,target=/src/node_mo
 
 FROM nginx:latest
 COPY --from=builder /src/client/dist /client
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080:80
