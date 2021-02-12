@@ -1,7 +1,7 @@
 mod base;
 
-mod auth_handler;
-mod card_handler;
+mod auth;
+mod card;
 
-pub use auth_handler::AuthHandler;
-pub use card_handler::CardHandler;
+pub use auth::Auth;
+pub use card::Card;

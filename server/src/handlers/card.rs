@@ -18,11 +18,11 @@ mod pb {
 
 use pb::{CardItem, CardListResponse};
 
-pub struct CardHandler {
+pub struct Card {
     pool: Pool<ConnectionManager<PgConnection>>,
 }
 
-impl CardHandler {
+impl Card {
     pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
 
@@ -31,7 +31,7 @@ impl CardHandler {
 }
 
 #[async_trait]
-impl pb::card_server::Card for CardHandler {
+impl pb::card_server::Card for Card {
     async fn list(&self, request: tonic::Request<()>) -> Result<Response<CardListResponse>, Status> {
         use schema::cards::dsl;
 

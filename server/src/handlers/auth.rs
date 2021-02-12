@@ -19,12 +19,12 @@ mod pb {
 
 use pb::{LoginRequest, LoginResponse, RegisterRequest};
 
-pub struct AuthHandler {
+pub struct Auth {
     pool: Pool<ConnectionManager<PgConnection>>,
     config: Config,
 }
 
-impl AuthHandler {
+impl Auth {
     pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::auth_server::AuthServer<Self> {
         pb::auth_server::AuthServer::new(Self { pool, config })
     }
@@ -35,7 +35,7 @@ impl AuthHandler {
 }
 
 #[async_trait]
-impl pb::auth_server::Auth for AuthHandler {
+impl pb::auth_server::Auth for Auth {
     async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
         let request = request.into_inner();
 
