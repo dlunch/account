@@ -29,8 +29,18 @@ impl Auth {
         pb::auth_server::AuthServer::new(Self { pool, config })
     }
 
-    fn hash_password(&self, password: &str) -> String {
-        argon2::hash_encoded(password.as_bytes(), self.config.password_salt.as_bytes(), &argon2::Config::default()).unwrap()
+    fn hash_password(&self, password: &str) -> Vec<u8> {
+        argon2::hash_raw(password.as_bytes(), self.config.password_salt.as_bytes(), &argon2::Config::default()).unwrap()
+    }
+
+    fn verify_password(&self, password: &str, password_hash: &[u8]) -> bool {
+        argon2::verify_raw(
+            password.as_bytes(),
+            self.config.password_salt.as_bytes(),
+            &password_hash,
+            &argon2::Config::default(),
+        )
+        .unwrap()
     }
 }
 
@@ -45,8 +55,7 @@ impl pb::auth_server::Auth for Auth {
             .await
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
-        let password_hash = self.hash_password(&request.password);
-        let matches = argon2::verify_encoded(&password_hash, &user.password).unwrap();
+        let matches = self.verify_password(&request.password, &user.password);
 
         if (!matches) {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
@@ -66,7 +75,7 @@ impl pb::auth_server::Auth for Auth {
             .values((
                 dsl::id.eq(Uuid::new_v4()),
                 dsl::username.eq(request.username),
-                dsl::password.eq(password_hash.into_bytes()),
+                dsl::password.eq(password_hash),
             ))
             .execute_async(&self.pool)
             .await
