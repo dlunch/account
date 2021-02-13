@@ -24,3 +24,6 @@ pub fn start(grpc_host: &str) {
 
     yew::start_app::<app::App>();
 }
+
+#[wasm_bindgen(start)]
+pub fn main() {}
