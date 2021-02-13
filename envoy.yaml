@@ -19,7 +19,7 @@ static_resources:
                           route: { cluster: service }
                       cors:
                         allow_origin_string_match:
-                          - exact: "http://localhost"
+                          - exact: "http://localhost:8080"
                           - exact: "https://account.dlunch.net"
                           - exact: "https://account-dev.dlunch.net"
                         allow_methods: GET, PUT, DELETE, POST, OPTIONS
