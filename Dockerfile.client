@@ -20,7 +20,7 @@ WORKDIR /src
 
 COPY . .
 RUN --mount=type=cache,target=/src/node_modules npm install
-ENV GRPC_HOST= $GRPC_HOST
+ENV GRPC_HOST=$GRPC_HOST
 RUN --mount=type=cache,target=/src/target --mount=type=cache,target=/src/node_modules npm run build:prod
 
 FROM nginx:latest
