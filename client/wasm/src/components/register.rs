@@ -70,7 +70,7 @@ impl Component for Register {
                     <p> <label for="username">{ "Username :" }</label> <input id="username" type="text" ref=self.username.clone() /> </p>
                     <p> <label for="password">{ "Password :" }</label> <input id="password" type="password" ref=self.password.clone() /> </p>
                     <p> <label for="password_again">{ "Password Again :" }</label> <input id="password_again" type="password" ref=self.password_again.clone() /> </p>
-                    <p> <button onclick=self.link.callback(|_| Msg::Submit)> { "Submit" }</button> </p>
+                    <p> <button onclick=self.link.callback(|_| Msg::Submit) type="button"> { "Submit" }</button> </p>
                 </form>
             </div>
         }
