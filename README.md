@@ -6,22 +6,43 @@ Run `docker-compose up --build` and open `http://localhost:8080` in your web bro
 
 ## Local development
 
+0. setup environment (first time only)  
+   create `.env` with following content:
+
+```
+POSTGRES_USER=<dbuser>
+POSTGRES_PASSWORD=<dbpassword>
+POSTGRES_DB=<dbname>
+
+LISTEN_ADDR=0.0.0.0:9090
+DATABASE_URL=postgres://<dbuser>:<dbpassword>@localhost/<dbname>
+PASSWORD_SALT=<random secret string>
+TOKEN_SECRET=<random secret string>
+```
+
 1. run envoy proxy
 
 ```
 docker run --network host -v `pwd`/envoy.yaml:/etc/envoy/envoy.yaml envoyproxy/envoy:v1.17-latest
 ```
 
-2. run server
+2. start database
+
+```
+docker-compose up -d db
+```
+
+3. run server
 
 ```
 cargo run --bin server
 ```
 
-3. run client
+4. run client
 
 ```
+npm install
 npm start
 ```
 
-4. Visit `http://localhost:8080` in your web browser
+5. Visit `http://localhost:8080` in your web browser
