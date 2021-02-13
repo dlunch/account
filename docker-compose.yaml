@@ -16,6 +16,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.client
+      args:
+        GRPC_HOST: "http://localhost:8000"
     ports:
       - 8080:80
     volumes:
