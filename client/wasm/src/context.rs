@@ -6,25 +6,16 @@ pub struct Context {
 
 impl Context {
     pub fn get() -> &'static Self {
-        // XXX not threadsafe, but we don't use threads on wasm environment.
-        unsafe {
-            match &INSTANCE {
-                Some(x) => x,
-                None => {
-                    let instance = Context::new();
-                    INSTANCE = Some(instance);
-
-                    INSTANCE.as_ref().unwrap()
-                }
-            }
-        }
+        return unsafe { INSTANCE.as_ref() }.unwrap();
     }
 
-    fn new() -> Self {
-        let grpc_host = "http://localhost:8000"; // TODO retrieve it from build environment.
-
-        Self {
+    pub fn init(grpc_host: &str) {
+        let instance = Self {
             grpc_host: grpc_host.to_owned(),
+        };
+
+        unsafe {
+            INSTANCE = Some(instance);
         }
     }
 }

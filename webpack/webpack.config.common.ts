@@ -71,6 +71,9 @@ const configuration: webpack.Configuration = {
   },
   plugins: [
     new HtmlEntryLoader.EntryExtractPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.IS_LOCALHOST': JSON.stringify(process.env.IS_LOCALHOST),
+    }),
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
     new (WebpackShellPluginNext as any)({
