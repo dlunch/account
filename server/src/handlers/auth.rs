@@ -71,16 +71,27 @@ impl pb::auth_server::Auth for Auth {
 
         let password_hash = self.hash_password(&request.password);
 
-        insert_into(dsl::users)
-            .values((
-                dsl::id.eq(Uuid::new_v4()),
-                dsl::username.eq(request.username),
-                dsl::password.eq(password_hash),
-            ))
-            .execute_async(&self.pool)
+        let count = dsl::users
+            .select(diesel::dsl::count_star())
+            .filter(dsl::username.eq(request.username.clone()))
+            .first_async::<i64>(&self.pool)
             .await
             .unwrap();
 
-        Ok(Response::new(()))
+        if count != 0 {
+            Err(Status::already_exists("Username already taken"))
+        } else {
+            insert_into(dsl::users)
+                .values((
+                    dsl::id.eq(Uuid::new_v4()),
+                    dsl::username.eq(request.username),
+                    dsl::password.eq(password_hash),
+                ))
+                .execute_async(&self.pool)
+                .await
+                .unwrap();
+
+            Ok(Response::new(()))
+        }
     }
 }
