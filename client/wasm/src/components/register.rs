@@ -66,12 +66,12 @@ impl Component for Register {
     fn view(&self) -> Html {
         html! {
             <div class="register">
-                <p>
-                    <label for="username">{ "Username :" }</label> <input id="username" type="text" ref=self.username.clone() />
-                    <label for="password">{ "Password :" }</label> <input id="password" type="password" ref=self.password.clone() />
-                    <label for="password_again">{ "Password Again :" }</label> <input id="password_again" type="password" ref=self.password_again.clone() />
-                    <button onclick=self.link.callback(|_| Msg::Submit)> { "Submit" }</button>
-                </p>
+                <form>
+                    <p> <label for="username">{ "Username :" }</label> <input id="username" type="text" ref=self.username.clone() /> </p>
+                    <p> <label for="password">{ "Password :" }</label> <input id="password" type="password" ref=self.password.clone() /> </p>
+                    <p> <label for="password_again">{ "Password Again :" }</label> <input id="password_again" type="password" ref=self.password_again.clone() /> </p>
+                    <p> <button onclick=self.link.callback(|_| Msg::Submit)> { "Submit" }</button> </p>
+                </form>
             </div>
         }
     }

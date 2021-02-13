@@ -25,8 +25,8 @@ impl Component for Index {
     fn view(&self) -> Html {
         html! {
             <div class="index">
-                <AppAnchor route=AppRoute::Login> { "Login" } </AppAnchor>
-                <AppAnchor route=AppRoute::Register> { "Register" } </AppAnchor>
+                <p> <AppAnchor route=AppRoute::Login> { "Login" } </AppAnchor> </p>
+                <p> <AppAnchor route=AppRoute::Register> { "Register" } </AppAnchor> </p>
             </div>
         }
     }
