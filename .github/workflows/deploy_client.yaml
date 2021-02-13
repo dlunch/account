@@ -66,6 +66,10 @@ jobs:
       - name: npm run build:prod
         run: npm run build:prod
 
+      - name: Prepare for Github Pages deploy
+        if: github.ref == 'refs/heads/main'
+        run: cp ./client/dist/index.html ./client/dist/404.html # For url rewrite
+
       - name: Deploy to Github Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
