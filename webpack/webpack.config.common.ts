@@ -14,7 +14,7 @@ const dist = path.resolve(root, 'client/dist');
 const protos = ['auth.proto', 'card.proto'];
 const grpcWebBuild = `node node_modules/protoc-gen-grpc/bin/protoc-gen-grpc.js -I=${path.resolve(root, 'node_modules/protoc/protoc/include')} -I=${path.resolve(root, 'proto')} ${protos.join(' ')}`
   + ` --js_out=import_style=commonjs,binary:${path.resolve('client/src/proto')}`
-  + ` --grpc-web_out=import_style=typescript,mode=grpcweb:${path.resolve('client/src/proto')}`;
+  + ` --grpc-web_out=import_style=commonjs+dts,mode=grpcweb:${path.resolve('client/src/proto')}`;
 
 const configuration: webpack.Configuration = {
   context: root,

@@ -404,6 +404,7 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
+ "js-sys",
  "log",
  "pretty_env_logger",
  "typescript-wasm-bindgen",
@@ -1152,13 +1153,13 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "lexical-core"
-version = "0.7.4"
+version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db65c6da02e61f55dae90a0ae427b2a5f6b3e8db09f58d10efab23af92592616"
+checksum = "21f866863575d0e1d654fbeeabdc927292fdf862873dc3c96c6f753357e13374"
 dependencies = [
  "arrayvec",
  "bitflags",
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "ryu",
  "static_assertions",
 ]
@@ -1430,14 +1431,14 @@ dependencies = [
 
 [[package]]
 name = "parking_lot_core"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ccb628cad4f84851442432c60ad8e1f607e29752d0bf072cbd0baf28aa34272"
+checksum = "fa7a782938e745763fe6907fc6ba86946d72f49fe7e21de074e08128a99fb018"
 dependencies = [
  "cfg-if 1.0.0",
  "instant",
  "libc",
- "redox_syscall 0.1.57",
+ "redox_syscall",
  "smallvec",
  "winapi",
 ]
@@ -1705,9 +1706,9 @@ checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
 name = "quote"
-version = "1.0.8"
+version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "991431c3519a3f36861882da93630ce66b52918dcf1b8e2fd66b397fc96f28df"
+checksum = "c3d0b9745dc2debf507c8422de05d7226cc1f0644216dfdfead988f9b1ab32a7"
 dependencies = [
  "proc-macro2",
 ]
@@ -1850,12 +1851,6 @@ checksum = "678054eb77286b51581ba43620cc911abf02758c91f93f479767aed0f90458b2"
 dependencies = [
  "rand_core 0.3.1",
 ]
-
-[[package]]
-name = "redox_syscall"
-version = "0.1.57"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41cc0f7e4d5d4544e8861606a285bb08d3e70712ccc7d2b84d7c0ccfaf4b05ce"
 
 [[package]]
 name = "redox_syscall"
@@ -2402,7 +2397,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "libc",
  "rand 0.8.3",
- "redox_syscall 0.2.4",
+ "redox_syscall",
  "remove_dir_all",
  "winapi",
 ]
@@ -2695,7 +2690,7 @@ checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 [[package]]
 name = "typescript-wasm-bindgen"
 version = "0.1.0"
-source = "git+https://github.com/dlunch/typescript-wasm-bindgen?branch=main#0ce6c5e8dd98405722e562fea5cdb48c696650ec"
+source = "git+https://github.com/dlunch/typescript-wasm-bindgen?branch=main#f84d9619ea6234e96a57cabc44c0913ad3c08f32"
 dependencies = [
  "typescript-wasm-bindgen-codegen",
  "typescript-wasm-bindgen-macros",
@@ -2704,7 +2699,7 @@ dependencies = [
 [[package]]
 name = "typescript-wasm-bindgen-codegen"
 version = "0.1.0"
-source = "git+https://github.com/dlunch/typescript-wasm-bindgen?branch=main#0ce6c5e8dd98405722e562fea5cdb48c696650ec"
+source = "git+https://github.com/dlunch/typescript-wasm-bindgen?branch=main#f84d9619ea6234e96a57cabc44c0913ad3c08f32"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2717,7 +2712,7 @@ dependencies = [
 [[package]]
 name = "typescript-wasm-bindgen-macros"
 version = "0.1.0"
-source = "git+https://github.com/dlunch/typescript-wasm-bindgen?branch=main#0ce6c5e8dd98405722e562fea5cdb48c696650ec"
+source = "git+https://github.com/dlunch/typescript-wasm-bindgen?branch=main#f84d9619ea6234e96a57cabc44c0913ad3c08f32"
 dependencies = [
  "proc-macro-error",
  "syn",

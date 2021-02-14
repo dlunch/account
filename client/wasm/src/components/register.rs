@@ -1,12 +1,12 @@
 use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::{window, HtmlInputElement};
 use yew::prelude::{html, html::NodeRef, Component, ComponentLink, Html, ShouldRender};
 
 use crate::context::Context;
-use crate::grpc::{AuthClient, RegisterRequest};
+use crate::grpc::{AuthPromiseClient, RegisterRequest};
 
 pub struct Register {
-    auth_client: AuthClient,
     link: ComponentLink<Self>,
     username: NodeRef,
     password: NodeRef,
@@ -22,11 +22,7 @@ impl Component for Register {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let context = Context::get();
-        let auth_client = AuthClient::new(&context.grpc_host, JsValue::NULL, JsValue::NULL);
-
         Self {
-            auth_client,
             link,
             username: NodeRef::default(),
             password: NodeRef::default(),
@@ -51,8 +47,12 @@ impl Component for Register {
                 register_request.setUsername(&username);
                 register_request.setPassword(&password);
 
-                self.auth_client
-                    .register(JsValue::from(register_request), JsValue::NULL, JsValue::UNDEFINED);
+                let context = Context::get();
+                let grpc_host = context.grpc_host.clone();
+                spawn_local(async move {
+                    let auth_client = AuthPromiseClient::new(&grpc_host, JsValue::NULL, JsValue::NULL);
+                    auth_client.register(JsValue::from(register_request), JsValue::NULL).await;
+                });
             }
         }
 
