@@ -43,6 +43,12 @@ impl Component for Register {
                     return false;
                 }
 
+                if username.is_empty() {
+                    window().unwrap().alert_with_message("Username is empty").unwrap();
+
+                    return false;
+                }
+
                 let register_request = RegisterRequest::new();
                 register_request.setUsername(&username);
                 register_request.setPassword(&password);
