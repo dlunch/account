@@ -1,13 +1,8 @@
 # Account
 
-## Running
+## Environment setup
 
-Run `docker-compose up --build` and open `http://localhost:8080` in your web browser.
-
-## Local development
-
-0. setup environment (first time only)  
-   create `.env` with following content:
+Create `.env` with following content:
 
 ```
 POSTGRES_USER=<dbuser>
@@ -19,6 +14,12 @@ DATABASE_URL=postgres://<dbuser>:<dbpassword>@localhost/<dbname>
 PASSWORD_SALT=<random secret string>
 TOKEN_SECRET=<random secret string>
 ```
+
+## Running
+
+Run `docker-compose up --build` and open `http://localhost:8080` in your web browser.
+
+## Local development
 
 1. run envoy proxy
 
