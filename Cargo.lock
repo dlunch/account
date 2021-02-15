@@ -1966,8 +1966,12 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
+ "dotenv",
+ "envy",
  "fantoccini",
  "maplit",
+ "pretty_env_logger",
+ "serde",
  "serde_json",
  "webdriver",
 ]
@@ -2057,7 +2061,6 @@ dependencies = [
  "pretty_env_logger",
  "prost",
  "rust-argon2",
- "scrap",
  "serde",
  "tonic",
  "tonic-build",

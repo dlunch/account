@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 async-trait = { version = "^0.1", default-features = false }
-async-std = { version = "^1.7", features = ["tokio1", "attributes"], default-features = false}
+async-std = { version = "^1.7", features = ["tokio1", "attributes", "default"], default-features = false }
 dotenv = { version = "^0.15", default-features = false }
 tonic = { version = "^0.4", features = ["transport", "codegen", "prost"], default-features = false }
 prost = { version = "^0.7", default-features = false }
@@ -20,8 +20,6 @@ jsonwebtoken = { version = "^7", default-features = false }
 serde = { version = "^1.0", features = ["derive"], default-features = false }
 envy = { version = "^0.4", default-features = false }
 async-diesel = { version = "^0.1", default-features = false }
-
-scrap = { path = "../scrap" }
 
 [build-dependencies]
 tonic-build = { version = "^0.4", features = ["transport", "rustfmt", "prost"], default-features = false }
