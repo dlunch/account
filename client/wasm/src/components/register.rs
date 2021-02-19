@@ -5,6 +5,7 @@ use yew::prelude::{html, html::NodeRef, Component, ComponentLink, Html, ShouldRe
 
 use crate::context::Context;
 use crate::grpc::{AuthPromiseClient, RegisterRequest};
+use crate::router::{change_route, AppRoute};
 
 pub struct Register {
     link: ComponentLink<Self>,
@@ -58,6 +59,8 @@ impl Component for Register {
                 spawn_local(async move {
                     let auth_client = AuthPromiseClient::new(&grpc_host, JsValue::NULL, JsValue::NULL);
                     auth_client.register(JsValue::from(register_request), JsValue::NULL).await;
+
+                    change_route(AppRoute::Login);
                 });
             }
         }
