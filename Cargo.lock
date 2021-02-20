@@ -2052,6 +2052,7 @@ dependencies = [
  "async-diesel",
  "async-std",
  "async-trait",
+ "cookie 0.14.3",
  "diesel",
  "diesel_migrations",
  "dotenv",

@@ -1,5 +1,6 @@
 use async_diesel::AsyncRunQueryDsl;
 use async_trait::async_trait;
+use cookie::Cookie;
 use diesel::{
     insert_into,
     r2d2::{ConnectionManager, Pool},
@@ -17,7 +18,7 @@ mod pb {
     tonic::include_proto!("auth");
 }
 
-use pb::{LoginRequest, LoginResponse, RegisterRequest};
+use pb::{LoginRequest, RegisterRequest};
 
 pub struct Auth {
     pool: Pool<ConnectionManager<PgConnection>>,
@@ -46,7 +47,7 @@ impl Auth {
 
 #[async_trait]
 impl pb::auth_server::Auth for Auth {
-    async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
+    async fn login(&self, request: Request<LoginRequest>) -> Result<Response<()>, Status> {
         let request = request.into_inner();
 
         let user = dsl::users
@@ -61,8 +62,12 @@ impl pb::auth_server::Auth for Auth {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
         } else {
             let token = base::create_token(&user.id.to_string(), &self.config.token_secret);
+            let cookie = Cookie::build("token", token).secure(true).http_only(true).finish();
 
-            Ok(Response::new(LoginResponse { token }))
+            let mut response = Response::new(());
+            response.metadata_mut().insert("Set-Cookie", cookie.to_string().parse().unwrap());
+
+            Ok(response)
         }
     }
 

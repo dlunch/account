@@ -1,6 +1,7 @@
 use std::str::{self, FromStr};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use cookie::Cookie;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use tonic::{metadata::MetadataValue, Request, Status};
@@ -40,22 +41,16 @@ fn decode_token(token: &str, secret: &str) -> String {
 }
 
 pub fn check_auth(mut request: Request<()>, token_secret: &str) -> Result<Request<()>, Status> {
-    if let Some(authorization) = request.metadata().get("authorization") {
-        let authorization = str::from_utf8(authorization.as_bytes()).unwrap();
+    if let Some(cookie) = request.metadata().get("Cookie") {
+        let cookie_str = str::from_utf8(cookie.as_bytes()).unwrap();
+        let cookie = Cookie::parse(cookie_str).unwrap();
 
-        let split = authorization.split(' ').collect::<Vec<_>>();
-        let (bearer, token) = (split[0], split[1]);
+        let user_id = decode_token(cookie.value(), token_secret);
 
-        if bearer.to_lowercase() != "bearer" {
-            Err(Status::unauthenticated("No valid auth token"))
-        } else {
-            let user_id = decode_token(token, token_secret);
+        request.metadata_mut().remove("user_id");
+        request.metadata_mut().append("user_id", MetadataValue::from_str(&user_id).unwrap());
 
-            request.metadata_mut().remove("user_id");
-            request.metadata_mut().append("user_id", MetadataValue::from_str(&user_id).unwrap());
-
-            Ok(request)
-        }
+        Ok(request)
     } else {
         Err(Status::unauthenticated("No valid auth token"))
     }
