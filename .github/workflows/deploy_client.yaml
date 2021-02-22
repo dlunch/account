@@ -64,6 +64,8 @@ jobs:
         run: npm install
 
       - name: npm run build:prod
+        env:
+          GRPC_HOST: "https://account-dev-server.dlunch.net"
         run: npm run build:prod
 
       - name: Prepare for Github Pages deploy
