@@ -29,6 +29,10 @@ docker run --network host -v `pwd`/envoy.yaml:/etc/envoy/envoy.yaml envoyproxy/e
 
 2. start database
 
+Install postgres and setup user/password same as `.env` file.
+
+or
+
 ```
 docker-compose up -d db
 ```
