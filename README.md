@@ -37,6 +37,16 @@ or
 docker-compose up -d db
 ```
 
+3. start redis
+
+Install redis
+
+or
+
+```
+docker-compose up -d redis
+```
+
 3. run server
 
 ```
