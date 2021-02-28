@@ -1,8 +1,7 @@
 #syntax=docker/dockerfile:experimental
 
-FROM dlunch/rust:1.50.0-stretch as builder
+FROM rust:1.50.0 as builder
 
-RUN rustup component add rustfmt
 WORKDIR /src
 
 COPY . .

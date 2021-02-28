@@ -48,17 +48,33 @@ or
 docker-compose up -d redis
 ```
 
-4. run server
+4. run scrap service
+
+(run astx if required)
+
+```
+docker build . --file Dockerfile.scrap --tag scrap
+docker run -it -p 55920:55930 --entrypoint /bin/sh scrap -c '/opt/AhnLab/ASTx/astxdaemon & socat TCP-LISTEN:55930,fork TCP:127.0.0.1:55920'
+```
+
+install geckodriver if not installed(package named firefox-geckodriver or similar)
+
+```
+geckodriver &
+env WEBDRIVER_HOST="http://127.0.0.1:4444" WEBDRIVER_HEADED=TRUE cargo run --bin scrap
+```
+
+5. run server
 
 ```
 cargo run --bin server
 ```
 
-5. run client
+6. run client
 
 ```
 npm install
 npm start
 ```
 
-6. Visit `http://localhost:8080` in your web browser
+7. Visit `http://localhost:8080` in your web browser
