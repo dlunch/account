@@ -3,9 +3,18 @@ on:
     branches:
       - main
 
-name: Build server image
+name: Build images
 
 jobs:
+  cancel_previous_runs:
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.4.1
+        with:
+          access_token: ${{ github.token }}
+
   build_server:
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-latest
@@ -20,11 +29,6 @@ jobs:
             platform: "linux/arm64"
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.4.1
-        with:
-          access_token: ${{ github.token }}
-
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
@@ -57,7 +61,7 @@ jobs:
             --cache-to "type=local,dest=/tmp/.buildx-cache,mode=max" \
             --platform ${{ matrix.targets.platform }} \
             --push \
-            --tag ghcr.io/$GITHUB_REPOSITORY:latest-${{ matrix.targets.tag }} \
+            --tag ghcr.io/$GITHUB_REPOSITORY:server-latest-${{ matrix.targets.tag }} \
             --file Dockerfile.server \
             .
 
@@ -66,7 +70,7 @@ jobs:
         run: |
           rm -f ${HOME}/.docker/config.json
 
-  merge_tags:
+  merge_server_tags:
     needs: build_server
     runs-on: ubuntu-latest
 
@@ -77,11 +81,36 @@ jobs:
       - env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
-          docker manifest create ghcr.io/$GITHUB_REPOSITORY:latest \
-            ghcr.io/$GITHUB_REPOSITORY:latest-amd64 \
-            ghcr.io/$GITHUB_REPOSITORY:latest-armv7 \
-            ghcr.io/$GITHUB_REPOSITORY:latest-arm64
-          docker manifest push ghcr.io/$GITHUB_REPOSITORY:latest
+          docker manifest create ghcr.io/$GITHUB_REPOSITORY:server-latest \
+            ghcr.io/$GITHUB_REPOSITORY:server-latest-amd64 \
+            ghcr.io/$GITHUB_REPOSITORY:server-latest-armv7 \
+            ghcr.io/$GITHUB_REPOSITORY:server-latest-arm64
+          docker manifest push ghcr.io/$GITHUB_REPOSITORY:server-latest
+
+      - name: Clear
+        if: always()
+        run: |
+          rm -f ${HOME}/.docker/config.json
+
+  build_scrap:
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: Docker Login
+        run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+
+      - name: Docker Build
+        run: |
+          docker build
+            --tag ghcr.io/$GITHUB_REPOSITORY:scrap-latest \
+            --file Dockerfile.scrap \
+            .
+          docker push ghcr.io/$GITHUB_REPOSITORY:scrap-latest
 
       - name: Clear
         if: always()
