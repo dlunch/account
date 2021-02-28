@@ -4,4 +4,5 @@ use serde::Deserialize;
 pub struct Config {
     pub start_webdriver: bool,
     pub start_astx: bool,
+    pub redis_url: String,
 }

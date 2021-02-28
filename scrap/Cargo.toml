@@ -15,3 +15,5 @@ serde = { version = "^1.0", features = ["derive"], default-features = false }
 envy = { version = "^0.4", default-features = false }
 pretty_env_logger = { version = "^0.4", default-features = false }
 dotenv = { version = "^0.15", default-features = false }
+redis = { version = "0.20", features = ["aio", "async-std-comp"], default-features = false }
+futures = { version = "^0.3", default-features = false }

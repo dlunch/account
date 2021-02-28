@@ -11,6 +11,7 @@ POSTGRES_DB=<dbname>
 
 LISTEN_ADDR=0.0.0.0:9090
 DATABASE_URL=postgres://<dbuser>:<dbpassword>@localhost/<dbname>
+REDIS_URL=redis://<redis_host>/
 PASSWORD_SALT=<random secret string>
 TOKEN_SECRET=<random secret string>
 ```
@@ -47,17 +48,17 @@ or
 docker-compose up -d redis
 ```
 
-3. run server
+4. run server
 
 ```
 cargo run --bin server
 ```
 
-4. run client
+5. run client
 
 ```
 npm install
 npm start
 ```
 
-5. Visit `http://localhost:8080` in your web browser
+6. Visit `http://localhost:8080` in your web browser
