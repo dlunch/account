@@ -106,10 +106,9 @@ jobs:
 
       - name: Docker Build
         run: |
-          docker build
+          docker build .
             --tag ghcr.io/$GITHUB_REPOSITORY:scrap-latest \
-            --file Dockerfile.scrap \
-            .
+            --file Dockerfile.scrap
           docker push ghcr.io/$GITHUB_REPOSITORY:scrap-latest
 
       - name: Clear
