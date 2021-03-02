@@ -15,7 +15,7 @@ impl WebDriverClientExtension for Client {
     async fn click_keypad_at(&mut self, x: isize, y: isize) -> Result<Value, CmdError> {
         self.execute(
             "
-                const nodes = document.querySelectorAll('li.sp');
+                const nodes = document.querySelectorAll('.askd_ui li.sp');
                 for (const node of nodes) {
                     const style = window.getComputedStyle(node);
                     if (style.backgroundPositionX === arguments[0] + 'px' && style.backgroundPositionY === arguments[1] + 'px') {
@@ -67,6 +67,8 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
 
     c.find(Locator::Id("인터넷서비스로그인ID")).await?.send_keys(&id).await?;
     c.find(Locator::Id("loginPwd")).await?.click().await?;
+
+    c.wait_for_find(Locator::Css(".askd_ui")).await?;
 
     let keys = [
         vec!['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
