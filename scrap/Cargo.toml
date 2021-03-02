@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Inseok Lee <dlunch@gmail.com>"]
 edition = "2018"
 
+[features]
+test_local = []
+
 [dependencies]
 fantoccini = { version = "^0.17", features = ["native-tls"], default-features = false }
 webdriver = { version = "^0.43", default-features = false }

@@ -102,3 +102,22 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
 
     c.close().await
 }
+
+#[cfg(test)]
+#[cfg(feature = "test_local")]
+mod tests {
+    use super::*;
+    use std::error::Error;
+
+    #[async_std::test]
+    async fn kbcard_test() -> Result<(), Box<dyn Error>> {
+        dotenv::dotenv().ok();
+
+        let id = std::env::var("KBCARD_ID")?;
+        let password = std::env::var("KBCARD_PW")?;
+
+        scrap_kbcard(&id, &password).await?;
+
+        Ok(())
+    }
+}
