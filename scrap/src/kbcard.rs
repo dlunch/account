@@ -44,8 +44,12 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
 
     c.goto("https://card.kbcard.com").await?;
 
-    // To login page
-    c.find(Locator::Id("loginLinkBtn")).await?.click().await?;
+    // To login page. We use js click because event banner might hide login button.
+    let current_url = c.current_url().await?;
+    c.execute("document.getElementById(arguments[0]).click()", vec![json!("loginLinkBtn")])
+        .await?;
+    task::sleep(Duration::from_secs(1)).await;
+    c.wait_for_navigation(Some(current_url)).await?;
 
     // Show login form
     c.find(Locator::Id("perTab01")).await?.click().await?;
