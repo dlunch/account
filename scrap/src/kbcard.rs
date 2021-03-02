@@ -1,8 +1,5 @@
-use std::time::Duration;
-
-use async_std::task;
 use async_trait::async_trait;
-use fantoccini::{error::CmdError, Client, Locator};
+use fantoccini::{elements::Element, error::CmdError, Client, Locator};
 use serde_json::{json, Value};
 
 use super::webdriver;
@@ -10,6 +7,7 @@ use super::webdriver;
 #[async_trait]
 trait WebDriverClientExtension {
     async fn click_keypad_at(&mut self, x: isize, y: isize) -> Result<Value, CmdError>;
+    async fn click_in_js_and_wait_for_navigation(&mut self, element: Element) -> Result<(), CmdError>;
 }
 
 #[async_trait]
@@ -33,6 +31,20 @@ impl WebDriverClientExtension for Client {
         )
         .await
     }
+
+    async fn click_in_js_and_wait_for_navigation(&mut self, element: Element) -> Result<(), CmdError> {
+        let current_url = self.current_url().await?;
+
+        self.execute("arguments[0].click()", vec![json!(element)]).await?;
+        self.wait_for_navigation(Some(current_url)).await?;
+        self.wait_for(move |c| {
+            let mut c = c.clone();
+            async move { Ok(c.execute("return document.readyState;", vec![]).await.unwrap() == "complete") }
+        })
+        .await?;
+
+        Ok(())
+    }
 }
 
 pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
@@ -45,11 +57,8 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
     c.goto("https://card.kbcard.com").await?;
 
     // To login page. We use js click because event banner might hide login button.
-    let current_url = c.current_url().await?;
-    c.execute("document.getElementById(arguments[0]).click()", vec![json!("loginLinkBtn")])
-        .await?;
-    task::sleep(Duration::from_secs(1)).await;
-    c.wait_for_navigation(Some(current_url)).await?;
+    let login_button = c.find(Locator::Id("loginLinkBtn")).await?;
+    c.click_in_js_and_wait_for_navigation(login_button).await?;
 
     // Show login form
     c.find(Locator::Id("perTab01")).await?.click().await?;
@@ -97,11 +106,9 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(), CmdError> {
     }
     c.click_keypad_at(-278, -374).await?; // finish
 
-    c.find(Locator::Id("doIdLogin")).await?.click().await?;
+    let do_login_button = c.find(Locator::Id("doIdLogin")).await?;
+    c.click_in_js_and_wait_for_navigation(do_login_button).await?;
 
-    c.wait_for_navigation(None).await?;
-
-    task::sleep(Duration::from_secs(1)).await; // ??? we need this
     println!("{}", c.find(Locator::Css("#BeyondViewAreaDivId em")).await?.text().await?);
 
     c.close().await
