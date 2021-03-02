@@ -1,0 +1,8 @@
+syntax = "proto3";
+package internal;
+
+message CardScrapRequest {
+  string card_type = 1;
+  string login_id_encrypted = 2;
+  string login_password_encrypted = 3;
+}
