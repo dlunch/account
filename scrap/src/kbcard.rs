@@ -7,7 +7,6 @@ use super::webdriver;
 #[async_trait]
 trait WebDriverClientExtension {
     async fn click_keypad_at(&mut self, x: isize, y: isize) -> Result<Value, CmdError>;
-    async fn click_in_js_and_wait_for_navigation(&mut self, element: Element) -> Result<(), CmdError>;
 }
 
 #[async_trait]
@@ -31,13 +30,23 @@ impl WebDriverClientExtension for Client {
         )
         .await
     }
+}
 
-    async fn click_in_js_and_wait_for_navigation(&mut self, element: Element) -> Result<(), CmdError> {
-        let current_url = self.current_url().await?;
+#[async_trait]
+trait WebDriverElementExtension {
+    async fn click_in_js(&self) -> Result<(), CmdError>;
+    async fn click_in_js_nowait(&self) -> Result<(), CmdError>;
+}
 
-        self.execute("arguments[0].click()", vec![json!(element)]).await?;
-        self.wait_for_navigation(Some(current_url)).await?;
-        self.wait_for(move |c| {
+#[async_trait]
+impl WebDriverElementExtension for Element {
+    async fn click_in_js(&self) -> Result<(), CmdError> {
+        let mut c = self.clone().client();
+        let current_url = c.current_url().await?;
+
+        c.execute("arguments[0].click()", vec![json!(self)]).await?;
+        c.wait_for_navigation(Some(current_url)).await?;
+        c.wait_for(move |c| {
             let mut c = c.clone();
             async move { Ok(c.execute("return document.readyState;", vec![]).await.unwrap() == "complete") }
         })
@@ -45,8 +54,15 @@ impl WebDriverClientExtension for Client {
 
         Ok(())
     }
-}
 
+    async fn click_in_js_nowait(&self) -> Result<(), CmdError> {
+        let mut c = self.clone().client();
+
+        c.execute("arguments[0].click()", vec![json!(self)]).await?;
+
+        Ok(())
+    }
+}
 pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> {
     if password.len() > 12 {
         panic!("kbcard password length must be lower or equal than 12 chars");
@@ -57,8 +73,7 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> 
     c.goto("https://card.kbcard.com").await?;
 
     // To login page. We use js click because event banner might hide login button.
-    let login_button = c.find(Locator::Id("loginLinkBtn")).await?;
-    c.click_in_js_and_wait_for_navigation(login_button).await?;
+    c.find(Locator::Id("loginLinkBtn")).await?.click_in_js().await?;
 
     // Show login form
     c.find(Locator::Id("perTab01")).await?.click().await?;
@@ -108,8 +123,7 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> 
     }
     c.click_keypad_at(-278, -374).await?; // finish
 
-    let do_login_button = c.find(Locator::Id("doIdLogin")).await?;
-    c.click_in_js_and_wait_for_navigation(do_login_button).await?;
+    c.find(Locator::Id("doIdLogin")).await?.click_in_js().await?;
 
     let title = c.execute("return document.title;", vec![]).await?;
     if title.as_str().unwrap().contains("멀티로그인(로그인전)") {
@@ -120,17 +134,14 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> 
     c.goto("https://card.kbcard.com/CXPRIMYS0007.cms").await?;
 
     // 일별조회
-    let by_day_button = c.find(Locator::Id("sample11")).await?;
-    c.execute("arguments[0].click();", vec![json!(by_day_button)]).await?;
+    c.find(Locator::Id("sample11")).await?.click_in_js_nowait().await?;
 
-    c.find(Locator::Id("시작일자1")).await?.clear().await?;
     c.find(Locator::Id("시작일자1")).await?.clear().await?;
     c.find(Locator::Id("시작일자1")).await?.send_keys("20200305").await?;
     c.find(Locator::Id("종료일자1")).await?.clear().await?;
     c.find(Locator::Id("종료일자1")).await?.send_keys("20210304").await?;
 
-    let inquiry_button = c.find(Locator::Id("inquryTableBtn")).await?;
-    c.execute("arguments[0].click();", vec![json!(inquiry_button)]).await?;
+    c.find(Locator::Id("inquryTableBtn")).await?.click_in_js_nowait().await?;
     c.wait_for(|c| {
         let mut c = c.clone();
         async move {
@@ -144,8 +155,7 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> 
 
     let result = c.find(Locator::Css("#ajaxResultDiv .tblH")).await?.html(true).await?;
 
-    let logout_button = c.find(Locator::Css(".kbBtn.btnS.logout")).await?;
-    c.click_in_js_and_wait_for_navigation(logout_button).await?;
+    c.find(Locator::Css(".kbBtn.btnS.logout")).await?.click_in_js().await?;
 
     c.close().await?;
 
