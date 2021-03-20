@@ -21,7 +21,7 @@ wee_alloc = { version = "^0.4", default-features = false }
 console_error_panic_hook = { version = "^0.1", default-features = false }
 console_log = { version = "0.2", features = ["color"], default-features = false }
 log = { version = "0.4", default-features = false }
-typescript-wasm-bindgen = { version = "^0.1" }
+typescript-wasm-bindgen = { version = "^0.1", default-features = false }
 
 [dev-dependencies]
 pretty_env_logger = { version = "^0.4", default-features = false }
