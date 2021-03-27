@@ -77,5 +77,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./client/dist
-          publish_branch: ${{ fromJSON('["gh-pages", "prod-pages"]')[ github.ref == 'refs/heads/main' ] }}
-          cname: ${{ fromJSON('["account-dev.dlunch.net", "account.dlunch.net"]')[ github.ref == 'refs/heads/main' ] }}
+          publish_branch: ${{ fromJSON('["gh-pages", "prod-pages"]')[ github.ref != 'refs/heads/main' ] }}
+          cname: ${{ fromJSON('["account-dev.dlunch.net", "account.dlunch.net"]')[ github.ref != 'refs/heads/main' ] }}
