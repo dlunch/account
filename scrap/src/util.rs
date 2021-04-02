@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use html_parser::{Dom, Element, Node, Result};
 
-trait NodeExtension {
+pub trait NodeExtension {
     fn maybe_element(&self, element_name: &str) -> Option<&Element>;
     fn maybe_text(&self) -> Option<&str>;
     fn inner_text(&self) -> String;
@@ -34,7 +34,7 @@ impl NodeExtension for Node {
     }
 }
 
-pub fn parse_table(table: &str) -> Result<Vec<HashMap<String, String>>> {
+pub fn parse_table(table: &str) -> Result<Vec<HashMap<String, Node>>> {
     let dom = Dom::parse(table)?;
 
     let headers = dom.children[0]
@@ -60,7 +60,7 @@ pub fn parse_table(table: &str) -> Result<Vec<HashMap<String, String>>> {
                 .children
                 .iter()
                 .enumerate()
-                .filter_map(|(index, node)| node.maybe_element("td").map(|_| (headers[index].to_owned(), node.inner_text())))
+                .filter_map(|(index, node)| node.maybe_element("td").map(|_| (headers[index].to_owned(), node.clone())))
                 .collect::<HashMap<_, _>>();
 
             (!items.is_empty()).then(|| items)
@@ -107,21 +107,21 @@ mod tests {
 
         let data = parse_table(table)?;
 
-        assert_eq!(data[0]["col1"], "1");
-        assert_eq!(data[0]["col2"], "2");
-        assert_eq!(data[0]["col3"], "3");
+        assert_eq!(data[0]["col1"].inner_text(), "1");
+        assert_eq!(data[0]["col2"].inner_text(), "2");
+        assert_eq!(data[0]["col3"].inner_text(), "3");
 
-        assert_eq!(data[1]["col1"], "11");
-        assert_eq!(data[1]["col2"], "22");
-        assert_eq!(data[1]["col3"], "33");
+        assert_eq!(data[1]["col1"].inner_text(), "11");
+        assert_eq!(data[1]["col2"].inner_text(), "22");
+        assert_eq!(data[1]["col3"].inner_text(), "33");
 
-        assert_eq!(data[2]["col1"], "111");
-        assert_eq!(data[2]["col2"], "222");
-        assert_eq!(data[2]["col3"], "333");
+        assert_eq!(data[2]["col1"].inner_text(), "111");
+        assert_eq!(data[2]["col2"].inner_text(), "222");
+        assert_eq!(data[2]["col3"].inner_text(), "333");
 
-        assert_eq!(data[3]["col1"], "1111");
-        assert_eq!(data[3]["col2"], "2222");
-        assert_eq!(data[3]["col3"], "3333");
+        assert_eq!(data[3]["col1"].inner_text(), "1111");
+        assert_eq!(data[3]["col2"].inner_text(), "2222");
+        assert_eq!(data[3]["col3"].inner_text(), "3333");
 
         Ok(())
     }

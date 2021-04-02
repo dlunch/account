@@ -4,6 +4,8 @@ use futures::stream::StreamExt;
 
 mod config;
 mod kbcard;
+mod structs;
+mod util;
 mod webdriver;
 
 #[async_std::main]

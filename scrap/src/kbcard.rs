@@ -1,7 +1,14 @@
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+
 use async_trait::async_trait;
+use chrono::{offset::Utc, NaiveDateTime, TimeZone};
+use chrono_tz::Asia::Seoul;
 use fantoccini::{elements::Element, error::CmdError, Client, Locator};
 use serde_json::{json, Value};
 
+use super::structs::{Card, CardTransaction};
+use super::util::{parse_table, NodeExtension};
 use super::webdriver;
 
 #[async_trait]
@@ -63,7 +70,7 @@ impl WebDriverElementExtension for Element {
         Ok(())
     }
 }
-pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> {
+pub async fn scrap_kbcard(id: &str, password: &str) -> Result<HashMap<Card, Vec<CardTransaction>>, CmdError> {
     if password.len() > 12 {
         panic!("kbcard password length must be lower or equal than 12 chars");
     }
@@ -153,30 +160,343 @@ pub async fn scrap_kbcard(id: &str, password: &str) -> Result<String, CmdError> 
     })
     .await?;
 
-    let result = c.find(Locator::Css("#ajaxResultDiv .tblH")).await?.html(true).await?;
+    let result = c.find(Locator::Css("#ajaxResultDiv .tblH")).await?.html(false).await?;
 
     c.find(Locator::Css(".kbBtn.btnS.logout")).await?.click_in_js().await?;
 
     c.close().await?;
 
-    Ok(result)
+    println!("{}", result);
+    Ok(parse(&result))
+}
+
+// (amount, currency)
+fn parse_amount_currency(amount_str: &str) -> (String, String) {
+    // $99.99
+    // 3,906원
+
+    // TODO validation
+    let (amount, currency) = amount_str.chars().partition(|x| x.is_numeric() || *x == '.');
+
+    (amount, currency.replace(',', ""))
+}
+
+fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
+    let mut result: HashMap<Card, Vec<CardTransaction>> = HashMap::new();
+
+    let table = parse_table(table).unwrap();
+    for item in table {
+        let date = Seoul
+            .from_local_datetime(&NaiveDateTime::parse_from_str(&item["이용일시"].inner_text(), "%Y.%m.%d %H:%M").unwrap())
+            .unwrap();
+
+        let (amount, currency) = parse_amount_currency(&item["이용금액"].inner_text());
+
+        let raw_month = item["결제방법"].inner_text();
+        let month = if raw_month == "일시불" { 0 } else { raw_month.parse::<i8>().unwrap() };
+
+        let transaction = CardTransaction {
+            transaction_id: item["승인번호"].inner_text(),
+            date: Utc.from_local_datetime(&date.naive_utc()).unwrap(),
+            amount,
+            currency,
+            merchant_id: item["이용하신곳"].inner_text(),
+            merchant: item["이용하신곳"].inner_text(),
+            month,
+            canceled: false,
+        };
+
+        let card = Card {
+            display_name: item["이용 카드명"].inner_text(),
+            last4: item["이용 카드명"].inner_text(),
+        };
+
+        match result.entry(card) {
+            Entry::Occupied(mut x) => {
+                x.get_mut().push(transaction);
+            }
+            Entry::Vacant(x) => {
+                x.insert(vec![transaction]);
+            }
+        }
+    }
+
+    result
 }
 
 #[cfg(test)]
-#[cfg(feature = "test_local")]
 mod tests {
     use super::*;
-    use std::error::Error;
 
     #[async_std::test]
+    #[cfg(feature = "test_local")]
     async fn kbcard_test() -> Result<(), Box<dyn Error>> {
         dotenv::dotenv().ok();
 
         let id = std::env::var("KBCARD_ID")?;
         let password = std::env::var("KBCARD_PW")?;
 
-        println!("{}", scrap_kbcard(&id, &password).await?);
+        scrap_kbcard(&id, &password).await?;
 
         Ok(())
+    }
+
+    #[test]
+    fn kbcard_parse_test() {
+        let table = r###"
+<table>
+    <caption>전체카드 상세이용내역</caption>
+        <colgroup>
+            <col width="10%">
+            <col width="7%">
+            <col width="*">
+            <col width="12%">
+            <col width="9%" span="3">
+            <col width="9%">
+            <col width="10%">   
+            <col width="10%">   
+            <col width="9%">    
+        </colgroup>
+        <thead>      
+        <tr>           
+            <th scope="col">이용일시</th>     
+            <th scope="col">이용<br>카드명</th>
+            <th scope="col">이용하신곳</th>   
+            <th scope="col">이용금액</th>
+            <th scope="col">결제방법</th>       
+            <th scope="col">가맹점<br>정보</th>
+            <th scope="col">할인금액</th>
+            <th scope="col">적립예상<br>포인트리</th>
+            <th scope="col">상태</th>
+            <th scope="col">결제예정일</th>
+            <th scope="col">승인번호</th>   
+        </tr>
+        </thead>
+        <tbody>
+
+           
+       <tr>
+       <td>
+           2021.03.03<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="Amazon_AWS" onclick="popSlsl('merchant id1' , 'base64 value','1', 'pg id1', '', '', '', '')">Amazon_AWS</a>
+           </td><td>3,906원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>1</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.03.02<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="(유)딜리버리히어로코리아_카카오페이" onclick="popSlsl('merchant id2' , 'base64 value','2', 'pg id2', '', '', '', '')">(유)딜리버리히어로코리아_카카오페이</a>
+           </td><td>9,700원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>2</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.03.02<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="Starlink Internet Serv" onclick="EngPopSlsl('base64 value','3')">Starlink Internet Serv</a>
+           </td><td class="linethrough">$99.99
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 취소전표매입
+           </td><td>    
+           </td>     
+           <td>3</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.28<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent1</span>
+                    <p>CardCardCard1</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0001">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="GOOGLE* Domains" onclick="EngPopSlsl('base64 value','4')">GOOGLE* Domains</a>
+           </td><td>$12.12
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>4</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.26<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="Starlink Internet Serv" onclick="EngPopSlsl('base64 value','5')">Starlink Internet Serv</a>
+           </td><td>$99.99
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>5</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.24<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent2</span>
+                    <p>CardCardCard2</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0002">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="쿠팡(쿠페이)" onclick="popSlsl('merchant id3' , 'base64 value','6', 'pg id3', '', '', '', '')">쿠팡(쿠페이)</a>
+           </td><td>24,060원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>6</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.23<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="쿠팡(로켓와우월회비)" onclick="popSlsl('merchant id4' , 'base64 value','7', 'pg id3', '', '', '', '')">쿠팡(로켓와우월회비)</a>
+           </td><td>2,900원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>7</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.21<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="(유)딜리버리히어로코리아_카카오페이" onclick="popSlsl('merchant id5' , 'base64 value','8', 'pg id2', '', '', '', '')">(유)딜리버리히어로코리아_카카오페이</a>
+           </td><td>33,900원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>8</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.20<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="지에스25 어딘가점" onclick="popSlsl('merchant id6' , 'base64 value','9', '', '', '', '', '')">지에스25 어딘가점</a>
+           </td><td>20,020원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>9</td>     
+       </tr>
+   
+       <tr>
+       <td>
+           2021.02.20<br>23:59
+           </td><td>
+                <div class="popBalloon">
+                    <span>CardIdent</span>
+                    <p>CardCardCard</p>
+                </div>
+                <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+           </td><td class="t_left"><a href="#none" class="linkPoint2 letterType1" title="쿠팡이츠" onclick="popSlsl('merchant id7' , 'base64 value','10', 'pg id3', '', '', '', '')">쿠팡이츠</a>
+           </td><td>24,500원
+           </td><td>일시불   
+           </td><td>      
+           </td><td>0
+           </td><td class="t_right">0 P
+           </td><td> 전표매입
+           </td><td>2021.04.01    
+           </td>     
+           <td>10</td>     
+       </tr>
+
+        </tbody>
+</table>"###;
+
+        let result = parse(table);
+
+        println!("{:?}", result);
+    }
+
+    #[test]
+    fn parse_amount_test() {
+        assert_eq!(("1234".into(), "원".into()), parse_amount_currency("1,234원"));
+        assert_eq!(("99.99".into(), "$".into()), parse_amount_currency("$99.99"));
+        assert_eq!(("123.45".into(), "€".into()), parse_amount_currency("€123.45"));
     }
 }

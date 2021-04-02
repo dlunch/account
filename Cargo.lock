@@ -435,6 +435,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "chrono-tz"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2554a3155fec064362507487171dcc4edc3df60cb10f3a1fb10ed8094822b120"
+dependencies = [
+ "chrono",
+ "parse-zoneinfo",
+]
+
+[[package]]
 name = "clap"
 version = "2.33.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1226,15 +1236,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "itertools"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37d572918e350e82412fe766d24b15e6682fb2ed2bbe018280caa810397cb319"
-dependencies = [
- "either",
-]
-
-[[package]]
 name = "itoa"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1578,6 +1579,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "parse-zoneinfo"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c705f256449c60da65e11ff6626e0c16a0a0b96aaa348de61376b249bc340f41"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "pem"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1842,7 +1852,7 @@ checksum = "32d3ebd75ac2679c2af3a92246639f9fcc8a442ee420719cc4fe195b98dd5fa3"
 dependencies = [
  "bytes 1.0.1",
  "heck",
- "itertools 0.9.0",
+ "itertools",
  "log",
  "multimap",
  "petgraph",
@@ -1859,7 +1869,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "169a15f3008ecb5160cba7d37bcd690a7601b6d30cfb87a117d45e59d52af5d4"
 dependencies = [
  "anyhow",
- "itertools 0.9.0",
+ "itertools",
  "proc-macro2",
  "quote",
  "syn",
@@ -2169,12 +2179,13 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
+ "chrono",
+ "chrono-tz",
  "dotenv",
  "envy",
  "fantoccini",
  "futures",
  "html_parser",
- "itertools 0.10.0",
  "maplit",
  "pretty_env_logger",
  "redis",
@@ -2958,9 +2969,9 @@ checksum = "373c8a200f9e67a0c95e62a4f52fbf80c23b4381c05a17845531982fa99e6b33"
 
 [[package]]
 name = "typescript-wasm-bindgen"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b6b8794519d6c12b971a4a5b622d25ced6e175728863d19f319a835184ce0c5"
+checksum = "04c3062fa3b721f23e2a311967c8ed94d3cb966e62574d7cce330d54f13254fa"
 dependencies = [
  "typescript-wasm-bindgen-codegen",
  "typescript-wasm-bindgen-macros",
@@ -2968,9 +2979,9 @@ dependencies = [
 
 [[package]]
 name = "typescript-wasm-bindgen-codegen"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cd64274d64f41c188828f38fd6c25a213bb22d042a94eea06cc8d46df4391ea"
+checksum = "77d1981bddbb266045d0ce295e9f97e279d26d7bbe30f073a939e66f0596f6d7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2982,9 +2993,9 @@ dependencies = [
 
 [[package]]
 name = "typescript-wasm-bindgen-macros"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "951fd6e881e4c27c83f4795d586ea345a31855d4bf4526268093f99190b262cb"
+checksum = "1bbb30bdfe33122ce6f908801d73b5ed091581757802411f73467ebde4c23683"
 dependencies = [
  "proc-macro-error",
  "syn",
