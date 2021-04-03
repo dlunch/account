@@ -230,7 +230,7 @@ mod tests {
 
     #[async_std::test]
     #[cfg(feature = "test_local")]
-    async fn kbcard_test() -> Result<(), Box<dyn Error>> {
+    async fn kbcard_test() -> Result<(), Box<dyn std::error::Error>> {
         dotenv::dotenv().ok();
 
         let id = std::env::var("KBCARD_ID")?;
