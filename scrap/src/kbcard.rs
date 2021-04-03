@@ -195,6 +195,8 @@ fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
         let raw_month = item["결제방법"].inner_text();
         let month = if raw_month == "일시불" { 0 } else { raw_month.parse::<i8>().unwrap() };
 
+        // <a href="#none" class="linkPoint2 letterType1" title="Amazon_AWS" onclick="popSlsl('merchant id1' , 'base64 value','1', 'pg id1', '', '', '', '')">Amazon_AWS</a>
+        // <a href="#none" class="linkPoint2 letterType1" title="GOOGLE* Domains" onclick="EngPopSlsl('base64 value','4')">GOOGLE* Domains</a>
         let merchant_onclick = &item["이용하신곳"].maybe_element("td").unwrap().children[0]
             .maybe_element("a")
             .unwrap()
@@ -222,9 +224,25 @@ fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
             canceled,
         };
 
+        /*
+           <div class="popBalloon">
+               <span>CardIdent</span>
+               <p>CardCardCard</p>
+           </div>
+           <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+        */
+        let card_name = item["이용 카드명"].maybe_element("td").unwrap().children[0]
+            .maybe_element("div")
+            .unwrap()
+            .children[1]
+            .inner_text();
+        let card_no_input = item["이용 카드명"].maybe_element("td").unwrap().children[1]
+            .maybe_element("input")
+            .unwrap();
+        let card_last4 = card_no_input.attributes["value"].as_ref().unwrap().split('-').last().unwrap();
         let card = Card {
-            display_name: item["이용 카드명"].inner_text(),
-            last4: item["이용 카드명"].inner_text(),
+            display_name: card_name,
+            last4: card_last4.into(),
         };
 
         match result.entry(card) {
