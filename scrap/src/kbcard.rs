@@ -524,7 +524,24 @@ mod tests {
 
         let result = parse(table);
 
-        println!("{:?}", result);
+        let first_card = Card {
+            display_name: "CardCardCard1".into(),
+            last4: "0001".into(),
+        };
+        assert_eq!(result[&first_card][0].transaction_id, "4");
+
+        let second_card = Card {
+            display_name: "CardCardCard2".into(),
+            last4: "0002".into(),
+        };
+        assert_eq!(result[&second_card][0].amount, "24060");
+
+        let card = Card {
+            display_name: "CardCardCard".into(),
+            last4: "0000".into(),
+        };
+
+        assert_eq!(result[&card][0].merchant, "Amazon_AWS");
     }
 
     #[test]

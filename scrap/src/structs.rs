@@ -1,6 +1,5 @@
 use chrono::{offset::Utc, DateTime};
 
-#[derive(Debug)]
 pub struct CardTransaction {
     pub transaction_id: String,
     pub date: DateTime<Utc>,
@@ -12,7 +11,7 @@ pub struct CardTransaction {
     pub canceled: bool,
 }
 
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash)]
 pub struct Card {
     pub display_name: String,
     pub last4: String,
