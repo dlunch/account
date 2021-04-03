@@ -195,15 +195,31 @@ fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
         let raw_month = item["결제방법"].inner_text();
         let month = if raw_month == "일시불" { 0 } else { raw_month.parse::<i8>().unwrap() };
 
+        let merchant_onclick = &item["이용하신곳"].maybe_element("td").unwrap().children[0]
+            .maybe_element("a")
+            .unwrap()
+            .attributes["onclick"];
+        let merchant_id = if currency == "원" {
+            Some(merchant_onclick.as_ref().unwrap().split('\'').nth(1).unwrap().into())
+        } else {
+            None
+        };
+
+        let canceled = match item["상태"].inner_text().as_str() {
+            "전표매입" => false,
+            "취소전표매입" => true,
+            _ => panic!("Unknown status {}", item["상태"].inner_text()),
+        };
+
         let transaction = CardTransaction {
             transaction_id: item["승인번호"].inner_text(),
             date: Utc.from_local_datetime(&date.naive_utc()).unwrap(),
             amount,
             currency,
-            merchant_id: item["이용하신곳"].inner_text(),
+            merchant_id,
             merchant: item["이용하신곳"].inner_text(),
             month,
-            canceled: false,
+            canceled,
         };
 
         let card = Card {

@@ -6,7 +6,7 @@ pub struct CardTransaction {
     pub date: DateTime<Utc>,
     pub amount: String,
     pub currency: String,
-    pub merchant_id: String,
+    pub merchant_id: Option<String>,
     pub merchant: String,
     pub month: i8,
     pub canceled: bool,
