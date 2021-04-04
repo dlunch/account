@@ -4,9 +4,10 @@ package proto.internal;
 import "google/protobuf/timestamp.proto";
 
 message CardScrapRequest {
-  string card_type = 1;
-  string login_id_encrypted = 2;
-  string login_password_encrypted = 3;
+  string user_id = 1;
+  string card_type = 2;
+  string login_id_encrypted = 3;
+  string login_password_encrypted = 4;
 }
 
 message Card {
@@ -27,6 +28,7 @@ message CardTransaction {
 }
 
 message CardScrapResponse {
-  repeated Card cards = 1;
-  repeated CardTransaction transactions = 2;
+  string user_id = 1;
+  repeated Card cards = 2;
+  repeated CardTransaction transactions = 3;
 }
