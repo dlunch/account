@@ -1,10 +1,10 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
+use std::collections::HashSet;
 
 use async_trait::async_trait;
-use chrono::{offset::Utc, NaiveDateTime, TimeZone};
+use chrono::{NaiveDateTime, TimeZone};
 use chrono_tz::Asia::Seoul;
 use fantoccini::{elements::Element, error::CmdError, Client, Locator};
+use prost_types::Timestamp;
 use serde_json::{json, Value};
 
 use super::structs::{Card, CardTransaction};
@@ -70,7 +70,7 @@ impl WebDriverElementExtension for Element {
         Ok(())
     }
 }
-pub async fn scrap_kbcard(id: &str, password: &str) -> Result<HashMap<Card, Vec<CardTransaction>>, CmdError> {
+pub async fn scrap_kbcard(id: &str, password: &str) -> Result<(Vec<Card>, Vec<CardTransaction>), CmdError> {
     if password.len() > 12 {
         panic!("kbcard password length must be lower or equal than 12 chars");
     }
@@ -181,11 +181,35 @@ fn parse_amount_currency(amount_str: &str) -> (String, String) {
     (amount, currency.replace(',', ""))
 }
 
-fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
-    let mut result: HashMap<Card, Vec<CardTransaction>> = HashMap::new();
+fn parse(table: &str) -> (Vec<Card>, Vec<CardTransaction>) {
+    let mut cards = HashSet::new();
+    let mut transactions = Vec::new();
 
     let table = parse_table(table).unwrap();
     for item in table {
+        /*
+           <div class="popBalloon">
+               <span>CardIdent</span>
+               <p>CardCardCard</p>
+           </div>
+           <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
+        */
+        let card_name = item["이용 카드명"].maybe_element("td").unwrap().children[0]
+            .maybe_element("div")
+            .unwrap()
+            .children[1]
+            .inner_text();
+        let card_no_input = item["이용 카드명"].maybe_element("td").unwrap().children[1]
+            .maybe_element("input")
+            .unwrap();
+        let card_no = card_no_input.attributes["value"].as_ref().unwrap();
+        let card = Card {
+            display_name: card_name,
+            card_no: card_no.into(),
+        };
+
+        cards.insert(card);
+
         let date = Seoul
             .from_local_datetime(&NaiveDateTime::parse_from_str(&item["이용일시"].inner_text(), "%Y.%m.%d %H:%M").unwrap())
             .unwrap();
@@ -193,7 +217,11 @@ fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
         let (amount, currency) = parse_amount_currency(&item["이용금액"].inner_text());
 
         let raw_month = item["결제방법"].inner_text();
-        let month = if raw_month == "일시불" { 0 } else { raw_month.parse::<i8>().unwrap() };
+        let month = if raw_month == "일시불" {
+            0
+        } else {
+            raw_month.parse::<i32>().unwrap()
+        };
 
         // <a href="#none" class="linkPoint2 letterType1" title="Amazon_AWS" onclick="popSlsl('merchant id1' , 'base64 value','1', 'pg id1', '', '', '', '')">Amazon_AWS</a>
         // <a href="#none" class="linkPoint2 letterType1" title="GOOGLE* Domains" onclick="EngPopSlsl('base64 value','4')">GOOGLE* Domains</a>
@@ -214,8 +242,12 @@ fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
         };
 
         let transaction = CardTransaction {
+            card_no: card_no.into(),
             transaction_id: item["승인번호"].inner_text(),
-            date: Utc.from_local_datetime(&date.naive_utc()).unwrap(),
+            date: Some(Timestamp {
+                seconds: date.timestamp(),
+                nanos: 0,
+            }),
             amount,
             currency,
             merchant_id,
@@ -224,38 +256,10 @@ fn parse(table: &str) -> HashMap<Card, Vec<CardTransaction>> {
             canceled,
         };
 
-        /*
-           <div class="popBalloon">
-               <span>CardIdent</span>
-               <p>CardCardCard</p>
-           </div>
-           <input type="hidden" id="마스킹카드번호" name="마스킹카드번호" value="0000-00**-****-0000">
-        */
-        let card_name = item["이용 카드명"].maybe_element("td").unwrap().children[0]
-            .maybe_element("div")
-            .unwrap()
-            .children[1]
-            .inner_text();
-        let card_no_input = item["이용 카드명"].maybe_element("td").unwrap().children[1]
-            .maybe_element("input")
-            .unwrap();
-        let card_last4 = card_no_input.attributes["value"].as_ref().unwrap().split('-').last().unwrap();
-        let card = Card {
-            display_name: card_name,
-            last4: card_last4.into(),
-        };
-
-        match result.entry(card) {
-            Entry::Occupied(mut x) => {
-                x.get_mut().push(transaction);
-            }
-            Entry::Vacant(x) => {
-                x.insert(vec![transaction]);
-            }
-        }
+        transactions.push(transaction);
     }
 
-    result
+    (cards.into_iter().collect::<Vec<_>>(), transactions)
 }
 
 #[cfg(test)]
@@ -524,24 +528,9 @@ mod tests {
 
         let result = parse(table);
 
-        let first_card = Card {
-            display_name: "CardCardCard1".into(),
-            last4: "0001".into(),
-        };
-        assert_eq!(result[&first_card][0].transaction_id, "4");
-
-        let second_card = Card {
-            display_name: "CardCardCard2".into(),
-            last4: "0002".into(),
-        };
-        assert_eq!(result[&second_card][0].amount, "24060");
-
-        let card = Card {
-            display_name: "CardCardCard".into(),
-            last4: "0000".into(),
-        };
-
-        assert_eq!(result[&card][0].merchant, "Amazon_AWS");
+        assert_eq!(result.0[0].card_no, "0000-00**-****-0000");
+        assert_eq!(result.1[0].amount, "3906");
+        assert_eq!(result.1[1].merchant, "(유)딜리버리히어로코리아_카카오페이");
     }
 
     #[test]

@@ -1,8 +1,32 @@
 syntax = "proto3";
-package internal;
+package proto.internal;
+
+import "google/protobuf/timestamp.proto";
 
 message CardScrapRequest {
   string card_type = 1;
   string login_id_encrypted = 2;
   string login_password_encrypted = 3;
+}
+
+message Card {
+  string display_name = 1;
+  string card_no = 2;
+}
+
+message CardTransaction {
+  string card_no = 1;
+  string transaction_id = 2;
+  google.protobuf.Timestamp date = 3;
+  string amount = 4;
+  string currency = 5;
+  optional string merchant_id = 6;
+  string merchant = 7;
+  int32 month = 8;
+  bool canceled = 9;
+}
+
+message CardScrapResponse {
+  repeated Card cards = 1;
+  repeated CardTransaction transactions = 2;
 }

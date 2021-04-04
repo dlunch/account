@@ -1,18 +1,12 @@
-use chrono::{offset::Utc, DateTime};
+use core::hash::{Hash, Hasher};
 
-pub struct CardTransaction {
-    pub transaction_id: String,
-    pub date: DateTime<Utc>,
-    pub amount: String,
-    pub currency: String,
-    pub merchant_id: Option<String>,
-    pub merchant: String,
-    pub month: i8,
-    pub canceled: bool,
-}
+include!(concat!(env!("OUT_DIR"), "/proto.internal.rs"));
 
-#[derive(Eq, PartialEq, Hash)]
-pub struct Card {
-    pub display_name: String,
-    pub last4: String,
+impl Eq for Card {}
+
+#[allow(clippy::derive_hash_xor_eq)]
+impl Hash for Card {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.card_no.hash(state);
+    }
 }
