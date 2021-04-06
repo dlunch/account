@@ -528,9 +528,9 @@ mod tests {
 
         let result = parse(table);
 
-        assert_eq!(result.0[0].card_no, "0000-00**-****-0000");
-        assert_eq!(result.1[0].amount, "3906");
-        assert_eq!(result.1[1].merchant, "(유)딜리버리히어로코리아_카카오페이");
+        assert_eq!(result.0.iter().any(|x| x.card_no == "0000-00**-****-0000"), true);
+        assert_eq!(result.1.iter().any(|x| x.amount == "3906"), true);
+        assert_eq!(result.1.iter().any(|x| x.merchant == "(유)딜리버리히어로코리아_카카오페이"), true);
     }
 
     #[test]
