@@ -2282,6 +2282,7 @@ dependencies = [
  "log",
  "pretty_env_logger",
  "prost",
+ "rand 0.8.3",
  "redis",
  "rust-argon2",
  "serde",

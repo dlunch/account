@@ -12,7 +12,6 @@ POSTGRES_DB=<dbname>
 LISTEN_ADDR=0.0.0.0:9090
 DATABASE_URL=postgres://<dbuser>:<dbpassword>@localhost/<dbname>
 REDIS_URL=redis://<redis_host>/
-PASSWORD_SALT=<random secret string>
 TOKEN_SECRET=<random secret string>
 ```
 

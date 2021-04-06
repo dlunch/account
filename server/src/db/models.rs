@@ -6,7 +6,7 @@ use uuid::Uuid;
 pub struct User {
     pub id: Uuid,
     pub username: String,
-    pub password: Vec<u8>,
+    pub password: String,
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
 }

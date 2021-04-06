@@ -6,6 +6,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     ExpressionMethods, PgConnection, QueryDsl,
 };
+use rand::Rng;
 use tonic::{Code, Request, Response, Status};
 use uuid::Uuid;
 
@@ -30,18 +31,13 @@ impl Auth {
         pb::auth_server::AuthServer::new(Self { pool, config })
     }
 
-    fn hash_password(&self, password: &str) -> Vec<u8> {
-        argon2::hash_raw(password.as_bytes(), self.config.password_salt.as_bytes(), &argon2::Config::default()).unwrap()
+    fn hash_password(&self, password: &str) -> String {
+        let salt = rand::thread_rng().gen::<[u8; 32]>();
+        argon2::hash_encoded(password.as_bytes(), &salt, &argon2::Config::default()).unwrap()
     }
 
-    fn verify_password(&self, password: &str, password_hash: &[u8]) -> bool {
-        argon2::verify_raw(
-            password.as_bytes(),
-            self.config.password_salt.as_bytes(),
-            &password_hash,
-            &argon2::Config::default(),
-        )
-        .unwrap()
+    fn verify_password(&self, password: &str, encoded_password: &str) -> bool {
+        argon2::verify_encoded(encoded_password, password.as_bytes()).unwrap()
     }
 }
 

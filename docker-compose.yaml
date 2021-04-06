@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 services:
   server:
     build:
@@ -7,7 +7,6 @@ services:
     environment:
       - LISTEN_ADDR=0.0.0.0:9090
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
-      - PASSWORD_SALT
       - TOKEN_SECRET
     depends_on:
       - db
@@ -17,7 +16,7 @@ services:
       context: .
       dockerfile: Dockerfile.client
       args:
-        GRPC_HOST: "http://localhost:8000"
+        GRPC_HOST: 'http://localhost:8000'
     ports:
       - 8080:80
     volumes:

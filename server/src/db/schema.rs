@@ -14,7 +14,7 @@ table! {
     users (id) {
         id -> Uuid,
         username -> Varchar,
-        password -> Bytea,
+        password -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
