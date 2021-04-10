@@ -22,13 +22,13 @@ mod pb {
 use pb::{LoginRequest, RegisterRequest};
 
 pub struct Auth {
-    pool: Pool<ConnectionManager<PgConnection>>,
+    db_pool: Pool<ConnectionManager<PgConnection>>,
     config: Config,
 }
 
 impl Auth {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::auth_server::AuthServer<Self> {
-        pb::auth_server::AuthServer::new(Self { pool, config })
+    pub fn new(db_pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::auth_server::AuthServer<Self> {
+        pb::auth_server::AuthServer::new(Self { db_pool, config })
     }
 
     fn hash_password(&self, password: &str) -> String {
@@ -48,7 +48,7 @@ impl pb::auth_server::Auth for Auth {
 
         let user = dsl::users
             .filter(dsl::username.eq(request.username))
-            .first_async::<models::User>(&self.pool)
+            .first_async::<models::User>(&self.db_pool)
             .await
             .map_err(|_| Status::new(Code::PermissionDenied, "Login Failure"))?;
 
@@ -75,7 +75,7 @@ impl pb::auth_server::Auth for Auth {
         let count = dsl::users
             .select(diesel::dsl::count_star())
             .filter(dsl::username.eq(request.username.clone()))
-            .first_async::<i64>(&self.pool)
+            .first_async::<i64>(&self.db_pool)
             .await
             .unwrap();
 
@@ -88,7 +88,7 @@ impl pb::auth_server::Auth for Auth {
                     dsl::username.eq(request.username),
                     dsl::password.eq(password_hash),
                 ))
-                .execute_async(&self.pool)
+                .execute_async(&self.db_pool)
                 .await
                 .unwrap();
 

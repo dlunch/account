@@ -19,14 +19,19 @@ mod pb {
 use pb::{CardItem, CardListResponse};
 
 pub struct Card {
-    pool: Pool<ConnectionManager<PgConnection>>,
+    db_pool: Pool<ConnectionManager<PgConnection>>,
+    redis_pool: deadpool_redis::Pool,
 }
 
 impl Card {
-    pub fn new(pool: Pool<ConnectionManager<PgConnection>>, config: Config) -> pb::card_server::CardServer<Self> {
+    pub fn new(
+        db_pool: Pool<ConnectionManager<PgConnection>>,
+        redis_pool: deadpool_redis::Pool,
+        config: Config,
+    ) -> pb::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
 
-        pb::card_server::CardServer::with_interceptor(Self { pool }, move |req| base::check_auth(req, &token_secret))
+        pb::card_server::CardServer::with_interceptor(Self { db_pool, redis_pool }, move |req| base::check_auth(req, &token_secret))
     }
 }
 
@@ -39,7 +44,7 @@ impl pb::card_server::Card for Card {
 
         let cards = dsl::cards
             .filter(dsl::user_id.eq(user_id))
-            .load_async::<models::Card>(&self.pool)
+            .load_async::<models::Card>(&self.db_pool)
             .await
             .unwrap();
 

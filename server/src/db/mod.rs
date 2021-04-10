@@ -10,7 +10,7 @@ use super::config::Config;
 
 embed_migrations!();
 
-pub fn create_pool(config: &Config) -> Result<Pool<ConnectionManager<PgConnection>>, PoolError> {
+pub fn create_db_pool(config: &Config) -> Result<Pool<ConnectionManager<PgConnection>>, PoolError> {
     let manager = ConnectionManager::<PgConnection>::new(&config.database_url);
     let pool = Pool::builder().build(manager)?;
 
