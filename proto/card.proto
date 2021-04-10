@@ -11,4 +11,9 @@ message CardItem {
 
 message CardListResponse { repeated CardItem items = 1; }
 
-service Card { rpc List(google.protobuf.Empty) returns (CardListResponse); }
+message StartScrapRequest { string card_id = 1; }
+
+service Card {
+  rpc List(google.protobuf.Empty) returns (CardListResponse);
+  rpc StartScrap(StartScrapRequest) returns (google.protobuf.Empty);
+}

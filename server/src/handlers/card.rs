@@ -4,6 +4,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     ExpressionMethods, PgConnection, QueryDsl,
 };
+use redis::AsyncCommands;
 use tonic::{Response, Status};
 
 use crate::config::Config;
@@ -16,7 +17,7 @@ mod pb {
     tonic::include_proto!("card");
 }
 
-use pb::{CardItem, CardListResponse};
+use pb::{CardItem, CardListResponse, StartScrapRequest};
 
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
@@ -60,5 +61,15 @@ impl pb::card_server::Card for Card {
         let response = CardListResponse { items };
 
         Ok(Response::new(response))
+    }
+
+    async fn start_scrap(&self, request: tonic::Request<StartScrapRequest>) -> Result<Response<()>, Status> {
+        let request = request.into_inner();
+
+        let mut conn = self.redis_pool.get().await.unwrap();
+
+        let _: () = conn.publish("scrap", request.card_id).await.unwrap();
+
+        Ok(Response::new(()))
     }
 }
