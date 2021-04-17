@@ -21,7 +21,7 @@ serde = { version = "^1.0", features = ["derive"], default-features = false }
 envy = { version = "^0.4", default-features = false }
 async-diesel = { version = "^0.1", default-features = false }
 cookie = { version = "0.15", default-features = false }
-redis = { version = "0.20", default-features = false }
+redis = { version = "0.20", features = ["aio", "async-std-comp"], default-features = false }
 rand = { version = "0.8", default-features = false }
 deadpool = { version = "0.7", default-features = false }
 deadpool-redis = { version = "0.7", default-features = false }
