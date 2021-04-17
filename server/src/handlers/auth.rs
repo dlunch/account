@@ -54,7 +54,7 @@ impl pb::auth_server::Auth for Auth {
 
         let matches = self.verify_password(&request.password, &user.password);
 
-        if (!matches) {
+        if !matches {
             Err(Status::new(Code::PermissionDenied, "Login Failure"))
         } else {
             let token = base::create_token(&user.id.to_string(), &self.config.token_secret);
