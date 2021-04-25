@@ -4,8 +4,10 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     ExpressionMethods, PgConnection, QueryDsl,
 };
+use prost::Message;
 use redis::AsyncCommands;
 use tonic::{Response, Status};
+use uuid::Uuid;
 
 use crate::config::Config;
 use crate::db::models;
@@ -15,6 +17,10 @@ use super::base;
 
 mod pb {
     tonic::include_proto!("card");
+}
+
+mod internal {
+    include!(concat!(env!("OUT_DIR"), "/proto.internal.rs"));
 }
 
 use pb::{CardItem, CardListResponse, StartScrapRequest};
@@ -41,7 +47,7 @@ impl pb::card_server::Card for Card {
     async fn list(&self, request: tonic::Request<()>) -> Result<Response<CardListResponse>, Status> {
         use schema::cards::dsl;
 
-        let user_id = base::get_user_id(request);
+        let user_id = base::get_user_id(&request);
 
         let cards = dsl::cards
             .filter(dsl::user_id.eq(user_id))
@@ -53,7 +59,7 @@ impl pb::card_server::Card for Card {
             .into_iter()
             .map(|x| CardItem {
                 id: x.id.to_string(),
-                r#type: x.type_,
+                r#type: x.r#type,
                 display_name: x.display_name,
             })
             .collect::<Vec<_>>();
@@ -64,11 +70,29 @@ impl pb::card_server::Card for Card {
     }
 
     async fn start_scrap(&self, request: tonic::Request<StartScrapRequest>) -> Result<Response<()>, Status> {
+        use schema::cards::dsl;
+        let user_id = base::get_user_id(&request);
         let request = request.into_inner();
 
         let mut conn = self.redis_pool.get().await.unwrap();
 
-        let _: () = conn.publish("scrap", request.card_id).await.unwrap();
+        let card = dsl::cards
+            .find(Uuid::parse_str(&request.card_id).unwrap())
+            .first_async::<models::Card>(&self.db_pool)
+            .await
+            .unwrap();
+
+        let scrap_req = internal::CardScrapRequest {
+            user_id: user_id.to_string(),
+            card_type: card.r#type,
+            login_id_encrypted: "".into(),
+            login_password_encrypted: "".into(),
+        };
+
+        let mut buf = vec![0u8; scrap_req.encoded_len()];
+        scrap_req.encode(&mut buf).unwrap();
+
+        let _: () = conn.publish("scrap", buf).await.unwrap();
 
         Ok(Response::new(()))
     }

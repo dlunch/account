@@ -56,6 +56,6 @@ pub fn check_auth(mut request: Request<()>, token_secret: &str) -> Result<Reques
     }
 }
 
-pub fn get_user_id(request: Request<()>) -> Uuid {
+pub fn get_user_id<T>(request: &Request<T>) -> Uuid {
     Uuid::from_str(request.metadata().get("user_id").unwrap().to_str().unwrap()).unwrap()
 }
