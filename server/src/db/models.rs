@@ -17,6 +17,8 @@ pub struct Card {
     pub user_id: Uuid,
     pub r#type: String,
     pub display_name: String,
+    pub login_id: String,
+    pub login_password: String,
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
 }
