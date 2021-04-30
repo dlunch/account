@@ -85,8 +85,8 @@ impl pb::card_server::Card for Card {
         let scrap_req = internal::CardScrapRequest {
             user_id: user_id.to_string(),
             card_type: card.r#type,
-            login_id_encrypted: "".into(),
-            login_password_encrypted: "".into(),
+            login_id_encrypted: card.login_id,
+            login_password_encrypted: card.login_password,
         };
 
         let mut buf = vec![0u8; scrap_req.encoded_len()];
