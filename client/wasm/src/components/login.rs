@@ -4,7 +4,7 @@ use web_sys::HtmlInputElement;
 use yew::prelude::{html, Component, ComponentLink, Html, NodeRef, ShouldRender};
 
 use crate::context::Context;
-use crate::grpc::{AuthPromiseClient, LoginRequest};
+use crate::grpc::auth::{AuthPromiseClient, LoginRequest};
 use crate::router::{change_route, AppRoute};
 
 pub struct Login {

@@ -4,7 +4,7 @@ use web_sys::{window, HtmlInputElement};
 use yew::prelude::{html, html::NodeRef, Component, ComponentLink, Html, ShouldRender};
 
 use crate::context::Context;
-use crate::grpc::{AuthPromiseClient, RegisterRequest};
+use crate::grpc::auth::{AuthPromiseClient, RegisterRequest};
 use crate::router::{change_route, AppRoute};
 
 pub struct Register {
