@@ -2,6 +2,7 @@ syntax = "proto3";
 package card;
 
 import "google/protobuf/empty.proto";
+import "common.proto";
 
 message CardItem {
   string id = 1;
@@ -13,7 +14,14 @@ message CardListResponse { repeated CardItem items = 1; }
 
 message StartScrapRequest { string card_id = 1; }
 
+message RegisterRequest {
+  common.CardCompany card_company = 1;
+  string login_id = 2;
+  string login_password = 3;
+ }
+
 service Card {
   rpc List(google.protobuf.Empty) returns (CardListResponse);
+  rpc Register(RegisterRequest) returns (google.protobuf.Empty);
   rpc StartScrap(StartScrapRequest) returns (google.protobuf.Empty);
 }

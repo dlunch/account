@@ -6,7 +6,7 @@ use diesel::{
 };
 use prost::Message;
 use redis::AsyncCommands;
-use tonic::{Response, Status};
+use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
 use crate::config::Config;
@@ -16,14 +16,19 @@ use crate::db::schema;
 use super::base;
 
 mod pb {
-    tonic::include_proto!("card");
+    pub mod common {
+        tonic::include_proto!("common");
+    }
+    pub mod card {
+        tonic::include_proto!("card");
+    }
 }
 
 mod internal {
     include!(concat!(env!("OUT_DIR"), "/proto.internal.rs"));
 }
 
-use pb::{CardItem, CardListResponse, StartScrapRequest};
+use pb::card::{CardItem, CardListResponse, RegisterRequest, StartScrapRequest};
 
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
@@ -35,16 +40,16 @@ impl Card {
         db_pool: Pool<ConnectionManager<PgConnection>>,
         redis_pool: deadpool_redis::Pool,
         config: Config,
-    ) -> pb::card_server::CardServer<Self> {
+    ) -> pb::card::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
 
-        pb::card_server::CardServer::with_interceptor(Self { db_pool, redis_pool }, move |req| base::check_auth(req, &token_secret))
+        pb::card::card_server::CardServer::with_interceptor(Self { db_pool, redis_pool }, move |req| base::check_auth(req, &token_secret))
     }
 }
 
 #[async_trait]
-impl pb::card_server::Card for Card {
-    async fn list(&self, request: tonic::Request<()>) -> Result<Response<CardListResponse>, Status> {
+impl pb::card::card_server::Card for Card {
+    async fn list(&self, request: Request<()>) -> Result<Response<CardListResponse>, Status> {
         use schema::cards::dsl;
 
         let user_id = base::get_user_id(&request);
@@ -69,7 +74,11 @@ impl pb::card_server::Card for Card {
         Ok(Response::new(response))
     }
 
-    async fn start_scrap(&self, request: tonic::Request<StartScrapRequest>) -> Result<Response<()>, Status> {
+    async fn register(&self, _: Request<RegisterRequest>) -> Result<Response<()>, Status> {
+        Ok(Response::new(()))
+    }
+
+    async fn start_scrap(&self, request: Request<StartScrapRequest>) -> Result<Response<()>, Status> {
         use schema::cards::dsl;
         let user_id = base::get_user_id(&request);
         let request = request.into_inner();
