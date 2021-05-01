@@ -21,7 +21,7 @@ message CardTransaction {
   google.protobuf.Timestamp date = 3;
   string amount = 4;
   string currency = 5;
-  optional string merchant_id = 6;
+  string merchant_id = 6;
   string merchant = 7;
   int32 month = 8;
   bool canceled = 9;

@@ -230,9 +230,9 @@ fn parse(table: &str) -> (Vec<Card>, Vec<CardTransaction>) {
             .unwrap()
             .attributes["onclick"];
         let merchant_id = if currency == "원" {
-            Some(merchant_onclick.as_ref().unwrap().split('\'').nth(1).unwrap().into())
+            merchant_onclick.as_ref().unwrap().split('\'').nth(1).unwrap().into()
         } else {
-            None
+            "".into()
         };
 
         let canceled = match item["상태"].inner_text().as_str() {
