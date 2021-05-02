@@ -13,6 +13,17 @@ table! {
 }
 
 table! {
+    user_credentials (id) {
+        id -> Uuid,
+        user_id -> Uuid,
+        #[sql_name = "type"]
+        type_ -> Varchar,
+        login_id -> Varchar,
+        login_password -> Varchar,
+    }
+}
+
+table! {
     users (id) {
         id -> Uuid,
         username -> Varchar,
@@ -23,5 +34,6 @@ table! {
 }
 
 joinable!(cards -> users (user_id));
+joinable!(user_credentials -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(cards, users,);
+allow_tables_to_appear_in_same_query!(cards, user_credentials, users,);
