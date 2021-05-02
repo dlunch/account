@@ -1,1 +1,1 @@
-drop table "cards";
+DROP TABLE "cards";
