@@ -6,5 +6,10 @@ CREATE TABLE "user_credentials" (
     login_id VARCHAR NOT NULL,
     login_password VARCHAR NOT NULL,
 
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     FOREIGN KEY(user_id) REFERENCES "users"(id)
-)
+);
+
+SELECT diesel_manage_updated_at('user_credentials');

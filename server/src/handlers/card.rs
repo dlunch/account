@@ -1,6 +1,7 @@
 use async_diesel::AsyncRunQueryDsl;
 use async_trait::async_trait;
 use diesel::{
+    insert_into,
     r2d2::{ConnectionManager, Pool},
     ExpressionMethods, PgConnection, QueryDsl,
 };
@@ -11,7 +12,6 @@ use uuid::Uuid;
 
 use crate::config::Config;
 use crate::db::models;
-use crate::db::schema;
 
 use super::base;
 
@@ -29,6 +29,7 @@ mod internal {
 }
 
 use pb::card::{CardItem, CardListResponse, RegisterRequest, StartScrapRequest};
+use pb::common::CardCompany;
 
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
@@ -50,7 +51,7 @@ impl Card {
 #[async_trait]
 impl pb::card::card_server::Card for Card {
     async fn list(&self, request: Request<()>) -> Result<Response<CardListResponse>, Status> {
-        use schema::cards::dsl;
+        use crate::db::schema::cards::dsl;
 
         let user_id = base::get_user_id(&request);
 
@@ -74,35 +75,65 @@ impl pb::card::card_server::Card for Card {
         Ok(Response::new(response))
     }
 
-    async fn register(&self, _: Request<RegisterRequest>) -> Result<Response<()>, Status> {
+    async fn register(&self, request: Request<RegisterRequest>) -> Result<Response<()>, Status> {
+        use crate::db::schema::user_credentials::dsl;
+
+        let user_id = base::get_user_id(&request);
+        let request = request.into_inner();
+
+        let r#type = Self::card_company_str(CardCompany::from_i32(request.card_company).unwrap());
+
+        insert_into(dsl::user_credentials)
+            .values((
+                dsl::id.eq(Uuid::new_v4()),
+                dsl::user_id.eq(user_id),
+                dsl::type_.eq(r#type),
+                dsl::login_id.eq(request.login_id),
+                dsl::login_password.eq(request.login_password),
+            ))
+            .execute_async(&self.db_pool)
+            .await
+            .unwrap();
+
         Ok(Response::new(()))
     }
 
     async fn start_scrap(&self, request: Request<StartScrapRequest>) -> Result<Response<()>, Status> {
-        use schema::cards::dsl;
+        use crate::db::schema::user_credentials::dsl;
+
         let user_id = base::get_user_id(&request);
         let request = request.into_inner();
 
-        let mut conn = self.redis_pool.get().await.unwrap();
+        let r#type = Self::card_company_str(CardCompany::from_i32(request.card_company).unwrap());
 
-        let card = dsl::cards
-            .find(Uuid::parse_str(&request.card_id).unwrap())
-            .first_async::<models::Card>(&self.db_pool)
+        let credential = dsl::user_credentials
+            .filter(dsl::user_id.eq(user_id))
+            .filter(dsl::type_.eq(r#type))
+            .first_async::<models::UserCredential>(&self.db_pool)
             .await
             .unwrap();
 
         let scrap_req = internal::CardScrapRequest {
             user_id: user_id.to_string(),
-            card_type: card.r#type,
-            login_id_encrypted: card.login_id,
-            login_password_encrypted: card.login_password,
+            card_type: credential.r#type,
+            login_id_encrypted: credential.login_id,
+            login_password_encrypted: credential.login_password,
         };
 
         let mut buf = vec![0u8; scrap_req.encoded_len()];
         scrap_req.encode(&mut buf).unwrap();
 
+        let mut conn = self.redis_pool.get().await.unwrap();
         let _: () = conn.publish("scrap", buf).await.unwrap();
 
         Ok(Response::new(()))
+    }
+}
+
+impl Card {
+    fn card_company_str(card_company: CardCompany) -> &'static str {
+        match card_company {
+            CardCompany::Kb => "Kb",
+        }
     }
 }

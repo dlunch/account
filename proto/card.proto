@@ -12,7 +12,7 @@ message CardItem {
 
 message CardListResponse { repeated CardItem items = 1; }
 
-message StartScrapRequest { string card_id = 1; }
+message StartScrapRequest { common.CardCompany card_company = 1; }
 
 message RegisterRequest {
   common.CardCompany card_company = 1;

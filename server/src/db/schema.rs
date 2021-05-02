@@ -5,8 +5,6 @@ table! {
         #[sql_name = "type"]
         type_ -> Varchar,
         display_name -> Varchar,
-        login_id -> Varchar,
-        login_password -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -20,6 +18,8 @@ table! {
         type_ -> Varchar,
         login_id -> Varchar,
         login_password -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 

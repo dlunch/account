@@ -1,1 +1,1 @@
-DROP TABLE "card_credentials";
+DROP TABLE "user_credentials";
