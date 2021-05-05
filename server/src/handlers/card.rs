@@ -1,3 +1,5 @@
+use aes_gcm_siv::aead::{Aead, NewAead};
+use aes_gcm_siv::{Aes256GcmSiv, Nonce};
 use async_diesel::AsyncRunQueryDsl;
 use async_trait::async_trait;
 use diesel::{
@@ -6,7 +8,9 @@ use diesel::{
     ExpressionMethods, PgConnection, QueryDsl,
 };
 use prost::Message;
+use rand::Rng;
 use redis::AsyncCommands;
+use sha3::{Digest, Sha3_256};
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
@@ -34,6 +38,7 @@ use pb::common::CardCompany;
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
     redis_pool: deadpool_redis::Pool,
+    credential_secret: String,
 }
 
 impl Card {
@@ -43,8 +48,16 @@ impl Card {
         config: Config,
     ) -> pb::card::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
+        let credential_secret = config.credential_secret;
 
-        pb::card::card_server::CardServer::with_interceptor(Self { db_pool, redis_pool }, move |req| base::check_auth(req, &token_secret))
+        pb::card::card_server::CardServer::with_interceptor(
+            Self {
+                db_pool,
+                redis_pool,
+                credential_secret,
+            },
+            move |req| base::check_auth(req, &token_secret),
+        )
     }
 }
 
@@ -83,13 +96,19 @@ impl pb::card::card_server::Card for Card {
 
         let r#type = Self::card_company_str(CardCompany::from_i32(request.card_company).unwrap());
 
+        let nonce = rand::thread_rng().gen::<[u8; 12]>();
+
+        let login_id_encrypted = self.encrypt(&nonce, &request.login_id);
+        let login_password_encrypted = self.encrypt(&nonce, &request.login_password);
+
         insert_into(dsl::user_credentials)
             .values((
                 dsl::id.eq(Uuid::new_v4()),
                 dsl::user_id.eq(user_id),
                 dsl::type_.eq(r#type),
-                dsl::login_id.eq(request.login_id),
-                dsl::login_password.eq(request.login_password),
+                dsl::login_id.eq(login_id_encrypted),
+                dsl::login_password.eq(login_password_encrypted),
+                dsl::nonce.eq(Vec::from(nonce)),
             ))
             .execute_async(&self.db_pool)
             .await
@@ -116,8 +135,8 @@ impl pb::card::card_server::Card for Card {
         let scrap_req = internal::CardScrapRequest {
             user_id: user_id.to_string(),
             card_type: credential.r#type,
-            login_id_encrypted: credential.login_id,
-            login_password_encrypted: credential.login_password,
+            login_id: credential.login_id,
+            login_password: credential.login_password,
         };
 
         let mut buf = vec![0u8; scrap_req.encoded_len()];
@@ -135,5 +154,13 @@ impl Card {
         match card_company {
             CardCompany::Kb => "Kb",
         }
+    }
+
+    fn encrypt(&self, nonce: &[u8; 12], plaintext: &str) -> Vec<u8> {
+        let key = Sha3_256::digest(self.credential_secret.as_bytes());
+        let cipher = Aes256GcmSiv::new(&key);
+        let nonce = Nonce::from_slice(nonce);
+
+        cipher.encrypt(&nonce, plaintext.as_bytes()).unwrap()
     }
 }

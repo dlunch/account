@@ -16,8 +16,9 @@ table! {
         user_id -> Uuid,
         #[sql_name = "type"]
         type_ -> Varchar,
-        login_id -> Varchar,
-        login_password -> Varchar,
+        login_id -> Bytea,
+        login_password -> Bytea,
+        nonce -> Bytea,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

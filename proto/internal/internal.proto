@@ -6,8 +6,8 @@ import "google/protobuf/timestamp.proto";
 message CardScrapRequest {
   string user_id = 1;
   string card_type = 2;
-  string login_id_encrypted = 3;
-  string login_password_encrypted = 4;
+  bytes login_id = 3;
+  bytes login_password = 4;
 }
 
 message Card {
