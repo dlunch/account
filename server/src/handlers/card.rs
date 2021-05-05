@@ -19,21 +19,24 @@ use crate::db::models;
 
 use super::base;
 
-mod pb {
+mod proto {
     pub mod common {
         tonic::include_proto!("common");
     }
     pub mod card {
         tonic::include_proto!("card");
     }
+
+    pub mod internal {
+        #[allow(clippy::module_inception)]
+        pub mod internal {
+            include!(concat!(env!("OUT_DIR"), "/proto.internal.rs"));
+        }
+    }
 }
 
-mod internal {
-    include!(concat!(env!("OUT_DIR"), "/proto.internal.rs"));
-}
-
-use pb::card::{CardItem, CardListResponse, RegisterRequest, StartScrapRequest};
-use pb::common::CardCompany;
+use proto::card::{CardItem, CardListResponse, RegisterRequest, StartScrapRequest};
+use proto::common::CardCompany;
 
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
@@ -46,11 +49,11 @@ impl Card {
         db_pool: Pool<ConnectionManager<PgConnection>>,
         redis_pool: deadpool_redis::Pool,
         config: Config,
-    ) -> pb::card::card_server::CardServer<Self> {
+    ) -> proto::card::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
         let credential_secret = config.credential_secret;
 
-        pb::card::card_server::CardServer::with_interceptor(
+        proto::card::card_server::CardServer::with_interceptor(
             Self {
                 db_pool,
                 redis_pool,
@@ -62,7 +65,7 @@ impl Card {
 }
 
 #[async_trait]
-impl pb::card::card_server::Card for Card {
+impl proto::card::card_server::Card for Card {
     async fn list(&self, request: Request<()>) -> Result<Response<CardListResponse>, Status> {
         use crate::db::schema::cards::dsl;
 
@@ -132,11 +135,12 @@ impl pb::card::card_server::Card for Card {
             .await
             .unwrap();
 
-        let scrap_req = internal::CardScrapRequest {
+        let scrap_req = proto::internal::internal::CardScrapRequest {
             user_id: user_id.to_string(),
-            card_type: credential.r#type,
+            card_company: Self::card_company(&credential.r#type) as i32,
             login_id: credential.login_id,
             login_password: credential.login_password,
+            nonce: credential.nonce,
         };
 
         let mut buf = vec![0u8; scrap_req.encoded_len()];
@@ -153,6 +157,13 @@ impl Card {
     fn card_company_str(card_company: CardCompany) -> &'static str {
         match card_company {
             CardCompany::Kb => "Kb",
+        }
+    }
+
+    fn card_company(card_company_str: &str) -> CardCompany {
+        match card_company_str {
+            "Kb" => CardCompany::Kb,
+            _ => panic!(),
         }
     }
 

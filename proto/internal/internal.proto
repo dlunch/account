@@ -2,12 +2,14 @@ syntax = "proto3";
 package proto.internal;
 
 import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 message CardScrapRequest {
   string user_id = 1;
-  string card_type = 2;
+  common.CardCompany card_company = 2;
   bytes login_id = 3;
   bytes login_password = 4;
+  bytes nonce = 5;
 }
 
 message Card {
