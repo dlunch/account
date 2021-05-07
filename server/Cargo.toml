@@ -5,30 +5,30 @@ authors = ["Inseok Lee <dlunch@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-async-trait = { version = "^0.1", default-features = false }
-async-std = { version = "^1.7", features = ["tokio1", "attributes", "default"], default-features = false }
-dotenv = { version = "^0.15", default-features = false }
-tonic = { version = "^0.4", features = ["transport", "codegen", "prost"], default-features = false }
-prost = { version = "^0.7", default-features = false }
-log = { version = "^0.4", default-features = false }
-pretty_env_logger = { version = "^0.4", default-features = false }
-diesel = { version = "^1.4", features = ["postgres", "uuid", "r2d2"], default-features = false }
-diesel_migrations = { version = "^1.4", default-features = false }
-rust-argon2 = { version = "^0.8", default-features = false }
-uuid = { version = "^0.6", features = ["v4"], default-features = false }
-jsonwebtoken = { version = "^7", default-features = false }
-serde = { version = "^1.0", features = ["derive"], default-features = false }
-envy = { version = "^0.4", default-features = false }
-async-diesel = { version = "^0.1", default-features = false }
-cookie = { version = "0.15", default-features = false }
-redis = { version = "0.20", features = ["aio", "async-std-comp"], default-features = false }
-rand = { version = "^0.8", default-features = false }
-deadpool = { version = "0.7", default-features = false }
-deadpool-redis = { version = "0.7", default-features = false }
-prost-types = { version = "^0.7", default-features = false }
-aes-gcm-siv = { version = "^0.10", features = ["alloc", "aes"], default-features = false }
-sha3 = { version = "^0.9", default-features = false }
+async-trait = { version = "^0.1" }
+async-std = { version = "^1.7", features = ["tokio1", "attributes"] }
+dotenv = { version = "^0.15" }
+tonic = { version = "^0.4" }
+prost = { version = "^0.7" }
+log = { version = "^0.4" }
+pretty_env_logger = { version = "^0.4" }
+diesel = { version = "^1.4", features = ["postgres", "uuid", "r2d2"] }
+diesel_migrations = { version = "^1.4" }
+rust-argon2 = { version = "^0.8" }
+uuid = { version = "^0.6", features = ["v4"] }
+jsonwebtoken = { version = "^7" }
+serde = { version = "^1.0" }
+envy = { version = "^0.4" }
+async-diesel = { version = "^0.1" }
+cookie = { version = "0.15" }
+redis = { version = "0.20", features = ["aio", "async-std-comp"] }
+rand = { version = "^0.8" }
+deadpool = { version = "0.7" }
+deadpool-redis = { version = "0.7" }
+prost-types = { version = "^0.7" }
+aes-gcm-siv = { version = "^0.10"}
+sha3 = { version = "^0.9" }
 
 [build-dependencies]
-tonic-build = { version = "^0.4", features = ["transport", "rustfmt", "prost"], default-features = false }
-prost-build = { version = "^0.7", default-features = false }
+tonic-build = { version = "^0.4" }
+prost-build = { version = "^0.7" }

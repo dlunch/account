@@ -8,23 +8,23 @@ edition = "2018"
 test_local = []
 
 [dependencies]
-fantoccini = { version = "^0.17", features = ["native-tls"], default-features = false }
-webdriver = { version = "^0.43", default-features = false }
-async-std = { version = "^1.7", features = ["tokio1", "attributes", "default"], default-features = false }
-serde_json = { version = "^1.0", default-features = false }
-maplit = { version = "^1.0", default-features = false }
-async-trait = { version = "^0.1", default-features = false }
-serde = { version = "^1.0", features = ["derive"], default-features = false }
-envy = { version = "^0.4", default-features = false }
-pretty_env_logger = { version = "^0.4", default-features = false }
-dotenv = { version = "^0.15", default-features = false }
-redis = { version = "0.20", features = ["aio", "async-std-comp"], default-features = false }
-futures = { version = "^0.3", default-features = false }
-html_parser = { version = "^0.6", default-features = false }
-chrono = { version = "^0.4", default-features = false }
-chrono-tz = { version = "^0.5", default-features = false }
-prost = { version = "^0.7", default-features = false }
-prost-types = { version = "^0.7", default-features = false }
+fantoccini = { version = "^0.17" }
+webdriver = { version = "^0.43" }
+async-std = { version = "^1.7", features = ["tokio1", "attributes"] }
+serde_json = { version = "^1.0" }
+maplit = { version = "^1.0" }
+async-trait = { version = "^0.1" }
+serde = { version = "^1.0" }
+envy = { version = "^0.4" }
+pretty_env_logger = { version = "^0.4" }
+dotenv = { version = "^0.15" }
+redis = { version = "0.20", features = ["aio", "async-std-comp"] }
+futures = { version = "^0.3" }
+html_parser = { version = "^0.6" }
+chrono = { version = "^0.4" }
+chrono-tz = { version = "^0.5" }
+prost = { version = "^0.7" }
+prost-types = { version = "^0.7" }
 
 [build-dependencies]
-prost-build = { version = "^0.7", default-features = false }
+prost-build = { version = "^0.7" }
