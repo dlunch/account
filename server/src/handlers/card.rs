@@ -10,7 +10,7 @@ use diesel::{
 use prost::Message;
 use rand::Rng;
 use redis::AsyncCommands;
-use sha3::{Digest, Sha3_256};
+use sha3::{digest, Digest, Sha3_256};
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
@@ -42,7 +42,7 @@ use proto::internal::internal::CardScrapRequest;
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
     redis_pool: deadpool_redis::Pool,
-    credential_secret: String,
+    key: digest::Output<Sha3_256>,
 }
 
 impl Card {
@@ -52,16 +52,9 @@ impl Card {
         config: Config,
     ) -> proto::card::card_server::CardServer<Self> {
         let token_secret = config.token_secret;
-        let credential_secret = config.credential_secret;
+        let key = Sha3_256::digest(config.credential_secret.as_bytes());
 
-        proto::card::card_server::CardServer::with_interceptor(
-            Self {
-                db_pool,
-                redis_pool,
-                credential_secret,
-            },
-            move |req| base::check_auth(req, &token_secret),
-        )
+        proto::card::card_server::CardServer::with_interceptor(Self { db_pool, redis_pool, key }, move |req| base::check_auth(req, &token_secret))
     }
 }
 
@@ -165,8 +158,7 @@ impl Card {
     }
 
     fn encrypt(&self, plaintext: &str) -> Vec<u8> {
-        let key = Sha3_256::digest(self.credential_secret.as_bytes());
-        let cipher = Aes256GcmSiv::new(&key);
+        let cipher = Aes256GcmSiv::new(&self.key);
 
         let nonce = Nonce::from(rand::thread_rng().gen::<[u8; 12]>());
         let ciphertext = cipher.encrypt(&nonce, plaintext.as_bytes()).unwrap();
