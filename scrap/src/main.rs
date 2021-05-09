@@ -1,12 +1,15 @@
 use std::process::Command;
 
 use futures::stream::StreamExt;
+use prost::Message;
 
 mod config;
 mod kbcard;
 mod structs;
 mod util;
 mod webdriver;
+
+use structs::CardScrapRequest;
 
 #[async_std::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -30,13 +33,19 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     stream
         .for_each(|msg| async move {
-            let payload: String = msg.get_payload().unwrap();
-            println!("channel '{}': {}", msg.get_channel_name(), payload);
+            let payload: Vec<u8> = msg.get_payload().unwrap();
+
+            if msg.get_channel_name() == "scrap" {
+                let req = CardScrapRequest::decode(&*payload).unwrap();
+                if req.card_company == 0 {
+                    // TODO enum
+                    kbcard::scrap_kbcard("test", "test").await.unwrap();
+                }
+            } else {
+                panic!("Unknown channel {}", msg.get_channel_name())
+            }
         })
         .await;
-
-    // TODO
-    kbcard::scrap_kbcard("test", "test").await?;
 
     Ok(())
 }

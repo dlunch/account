@@ -37,6 +37,7 @@ mod proto {
 
 use proto::card::{CardItem, CardListResponse, RegisterRequest, StartScrapRequest};
 use proto::common::CardCompany;
+use proto::internal::internal::CardScrapRequest;
 
 pub struct Card {
     db_pool: Pool<ConnectionManager<PgConnection>>,
@@ -135,7 +136,7 @@ impl proto::card::card_server::Card for Card {
             .await
             .unwrap();
 
-        let scrap_req = proto::internal::internal::CardScrapRequest {
+        let scrap_req = CardScrapRequest {
             user_id: user_id.to_string(),
             card_company: Self::card_company(&credential.r#type) as i32,
             login_id: credential.login_id,
