@@ -9,7 +9,6 @@ message CardScrapRequest {
   common.CardCompany card_company = 2;
   bytes login_id = 3;
   bytes login_password = 4;
-  bytes nonce = 5;
 }
 
 message Card {

@@ -18,7 +18,6 @@ table! {
         type_ -> Varchar,
         login_id -> Bytea,
         login_password -> Bytea,
-        nonce -> Bytea,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

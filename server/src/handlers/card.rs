@@ -100,10 +100,8 @@ impl proto::card::card_server::Card for Card {
 
         let r#type = Self::card_company_str(CardCompany::from_i32(request.card_company).unwrap());
 
-        let nonce = rand::thread_rng().gen::<[u8; 12]>();
-
-        let login_id_encrypted = self.encrypt(&nonce, &request.login_id);
-        let login_password_encrypted = self.encrypt(&nonce, &request.login_password);
+        let login_id_encrypted = self.encrypt(&request.login_id);
+        let login_password_encrypted = self.encrypt(&request.login_password);
 
         insert_into(dsl::user_credentials)
             .values((
@@ -112,7 +110,6 @@ impl proto::card::card_server::Card for Card {
                 dsl::type_.eq(r#type),
                 dsl::login_id.eq(login_id_encrypted),
                 dsl::login_password.eq(login_password_encrypted),
-                dsl::nonce.eq(Vec::from(nonce)),
             ))
             .execute_async(&self.db_pool)
             .await
@@ -141,7 +138,6 @@ impl proto::card::card_server::Card for Card {
             card_company: Self::card_company(&credential.r#type) as i32,
             login_id: credential.login_id,
             login_password: credential.login_password,
-            nonce: credential.nonce,
         };
 
         let mut buf = vec![0u8; scrap_req.encoded_len()];
@@ -168,11 +164,13 @@ impl Card {
         }
     }
 
-    fn encrypt(&self, nonce: &[u8; 12], plaintext: &str) -> Vec<u8> {
+    fn encrypt(&self, plaintext: &str) -> Vec<u8> {
         let key = Sha3_256::digest(self.credential_secret.as_bytes());
         let cipher = Aes256GcmSiv::new(&key);
-        let nonce = Nonce::from_slice(nonce);
 
-        cipher.encrypt(&nonce, plaintext.as_bytes()).unwrap()
+        let nonce = Nonce::from(rand::thread_rng().gen::<[u8; 12]>());
+        let ciphertext = cipher.encrypt(&nonce, plaintext.as_bytes()).unwrap();
+
+        nonce.into_iter().chain(ciphertext.into_iter()).collect()
     }
 }

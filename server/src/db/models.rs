@@ -28,7 +28,6 @@ pub struct UserCredential {
     pub r#type: String,
     pub login_id: Vec<u8>,
     pub login_password: Vec<u8>,
-    pub nonce: Vec<u8>,
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
 }

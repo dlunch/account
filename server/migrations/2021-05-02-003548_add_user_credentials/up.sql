@@ -5,7 +5,6 @@ CREATE TABLE "user_credentials" (
     type VARCHAR NOT NULL,
     login_id BYTEA NOT NULL,
     login_password BYTEA NOT NULL,
-    nonce BYTEA NOT NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
