@@ -22,7 +22,7 @@
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-import-resolver-typescript": "^2.3.0",
     "eslint-plugin-import": "^2.20.2",
-    "google-protobuf": "^3.14.0",
+    "google-protobuf": "^3.17.3",
     "grpc-web": "^1.2.1",
     "html-entry-loader": "git+https://github.com/dlunch/html-entry-loader.git",
     "less": "^4.1.1",
