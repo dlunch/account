@@ -15,7 +15,7 @@ pretty_env_logger = { version = "^0.4" }
 diesel = { version = "^1.4", features = ["postgres", "uuid", "r2d2"] }
 diesel_migrations = { version = "^1.4" }
 rust-argon2 = { version = "^0.8" }
-uuid = { version = "^0.6", features = ["v4"] }
+uuid = { version = "^0.8", features = ["v4"] }
 jsonwebtoken = { version = "^7" }
 serde = { version = "^1.0" }
 envy = { version = "^0.4" }
