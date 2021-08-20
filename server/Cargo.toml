@@ -24,7 +24,7 @@ cookie = { version = "0.15" }
 redis = { version = "0.20", features = ["aio", "async-std-comp"] }
 rand = { version = "^0.8" }
 deadpool = { version = "0.7" }
-deadpool-redis = { version = "0.7" }
+deadpool-redis = { version = "0.9" }
 prost-types = { version = "^0.7" }
 aes-gcm-siv = { version = "^0.10"}
 sha3 = { version = "^0.9" }
